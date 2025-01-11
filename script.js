@@ -93,7 +93,7 @@ function generateQuotation() {
 
 
     let quoteHTML = `
-<div style="flex-direction: column; background-color: rgb(4, 71, 71);">
+<div style="flex-direction: column; background-color: rgb(46, 48, 48);">
     <div style="text-align: center;">
         <div style="display: block;">
             <img src="logo.jpeg" alt="Company Logo" style="width:100px; margin-bottom:20px;">
@@ -190,7 +190,7 @@ function generateQuotation() {
        quoteHTML += ` 
         </div>
         <div>
-            <div style="text-align : center; background-color: rgb(14, 65, 64); padding:15px; ">
+            <div style="text-align : center; background-color: rgb(14, 65, 64); padding:15px; margin:30px">
                 <div style=" font-family: freight-text-pro, serif; font-size: 26px;color: rgb(249, 203, 156);">
                     COMPLIMENTARY COUPLE
                     SHOOT</div>
