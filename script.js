@@ -10,43 +10,43 @@ function addEvent() {
 
         <label>Event Name:</label>
 
-        <input type="text" class="eventName" required>
+        <input type="text" name="eventName" required>
 
-        
+
 
         <label>Location:</label>
 
-        <input type="text" class="eventLocation" required>
+        <input type="text" name="eventLocation" required>
 
-        
+
 
         <label>Date:</label>
 
-        <input type="date" class="eventDate" required>
+        <input type="date" name="eventDate" required>
 
-        
+
 
         <label>Cinematographers:</label>
 
-        <input type="number" class="cinematographers" min="0" required>
+        <input type="number" name="cinematographers" min="0" required>
 
-        
+
 
         <label>Candid Photographers:</label>
 
-        <input type="number" class="candidPhotographers" min="0" required>
+        <input type="number" name="candidPhotographers" min="0" required>
 
-        
+
 
         <label>Traditional Photographers:</label>
 
-        <input type="number" class="traditionalPhotographers" min="0" required>
+        <input type="number" name="traditionalPhotographers" min="0" required>
 
-        
+
 
         <label>Traditional Videographers:</label>
 
-        <input type="number" class="traditionalVideographers" min="0" required>
+        <input type="number" name="traditionalVideographers" min="0" required>
 
     `;
 
