@@ -142,8 +142,7 @@ function generateQuotation() {
 
         </div>
 
-        <div class="column" style="display: flex; text-align: center; color: rgb(0, 0, 0); word-break: break-word;">
-            <div class="text_component component  undefined" style="height: 100%;">
+        <div class="column" style=" text-align: center; color: rgb(0, 0, 0); word-break: break-word;">
                 <div>
                     <p style="font-family: freight-text-pro, serif; font-weight: 400; font-size: 40px;">
                         <span style="color: rgb(249, 203, 156);">
