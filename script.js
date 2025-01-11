@@ -225,7 +225,7 @@ function generateQuotation() {
     `;
 const newTab = window.open('','_blank');
 newTab.document.write(quoteHTML);
-    new.document.close();
+    newTab.document.close();
 
 
     document.getElementById("quotationContainer").innerHTML = quoteHTML;
