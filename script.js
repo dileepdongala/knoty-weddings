@@ -107,8 +107,8 @@ function generateQuotation() {
                             style="display: flex; max-width: 400px; justify-content: center; background-color: transparent;">
                             <div class="image_block component " style="width: 192px; height: 192px;">
                                 <div class="img_cropper">
-                                    <img src="logo.jpeg" alt=""
-                                        style="transform: translate(-2.41955px, -2.03063px) rotate(0deg) scale(2.645);">
+                                    <img src="logo.jpeg" alt="Company Logo"
+                                        style="width:100px; margin-bottom:20px;">
                                 </div>
                             </div>
                         </div>
@@ -143,7 +143,6 @@ function generateQuotation() {
                     </span>
                 </p>
             </div>
-            <h2>Dear ${bride} & ${groom},</h2>
 
         </div>
 
