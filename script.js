@@ -1,10 +1,10 @@
 function addEvent() {
 
-    const eventSection = document.getElementById("eventSection");
+    const eventSection = document.getElementById('eventSection');
 
-    const newEvent = document.createElement("div");
+    const newEvent = document.createElement('div');
 
-    newEvent.classList.add("event");
+    newEvent.classList.add('event');
 
     newEvent.innerHTML = `
 
@@ -223,7 +223,9 @@ function generateQuotation() {
         <ul>${terms.map(term => `<li>${term}</li>`).join("")}</ul>
 
     `;
-
+const newTab = window.open('','_blank');
+newTab.document.write(quoteHTML);
+    new.document.close();
 
 
     document.getElementById("quotationContainer").innerHTML = quoteHTML;
