@@ -76,7 +76,7 @@ function generateQuotation() {
 
         <div style="text-align: center;">
 
-            <img src="logo.jpg" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
+            <img src="logo.jpeg" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
 
             <h2>Dear ${bride} & ${groom},</h2>
 
