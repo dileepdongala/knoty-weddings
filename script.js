@@ -95,16 +95,12 @@ function generateQuotation() {
     let quoteHTML = `
 
 <div style="text-align: center;">
-
-    <div data-section-id="6752cea1a7c06d85177d809e" data-block-id="image" style="display: block;">
-        <div class="block  "
-            style="flex-direction: column; background-color: rgb(4, 71, 71); background-size: cover; background-position: center center; background-repeat: no-repeat; position: relative; border: none;">
+    <div style="display: block;">
+        <div class="block" style="flex-direction: column; background-color: rgb(4, 71, 71); background-size: cover; background-position: center center; background-repeat: no-repeat; position: relative; border: none;">
             <div style="display: flex; padding: 0px; z-index: 1;">
-                <div class="layout d-flex justify-content-center gap-0-imp  flex-direction-row-reverse-imp"
-                    style="display: flex; width: 100%; gap: 40px;">
+                <div class="layout d-flex justify-content-center gap-0-imp  flex-direction-row-reverse-imp" style="display: flex; width: 100%; gap: 40px;">
                     <div class="row w-100p d-flex justify-content-center align-items-center  gap-152 p-y-30px">
-                        <div class="column"
-                            style="display: flex; max-width: 400px; justify-content: center; background-color: transparent;">
+                        <div class="column" style="display: flex; justify-content: center; background-color: transparent;">
                             <div class="image_block component " style="width: 192px; height: 192px;">
                                 <div class="img_cropper">
                                     <img src="logo.jpeg" alt="Company Logo"
@@ -146,7 +142,7 @@ function generateQuotation() {
 
         </div>
 
-        <div class="column     " style="display: flex; text-align: center; color: rgb(0, 0, 0); word-break: break-word;">
+        <div class="column" style="display: flex; text-align: center; color: rgb(0, 0, 0); word-break: break-word;">
             <div class="text_component component  undefined" style="height: 100%;">
                 <div>
                     <p style="font-family: freight-text-pro, serif; font-weight: 400; font-size: 40px;">
@@ -222,8 +218,8 @@ function generateQuotation() {
         <ul>${terms.map(term => `<li>${term}</li>`).join("")}</ul>
 
     `;
-const newTab = window.open('','_blank');
-newTab.document.write(quoteHTML);
+    const newTab = window.open('','_blank');
+    newTab.document.write(quoteHTML);
     newTab.document.close();
 
 
