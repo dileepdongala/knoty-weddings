@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Photography Quotation Generator</title>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1>Photography Quotation Generator</h1>
+
+    </header>
+
+    <main>
+
+        <form id="quoteForm">
+
+            <h2>Client Details</h2>
+
+            <label for="bride">Bride's Name:</label>
+
+            <input type="text" id="bride" name="bride" required>
+
+
+
+            <label for="groom">Groom's Name:</label>
+
+            <input type="text" id="groom" name="groom" required>
+
+
+
+            <h2>Event Details</h2>
+
+            <div id="eventSection">
+
+                <div class="event">
+
+                    <label for="eventName">Event Name:</label>
+
+                    <input type="text" name="eventName" required>
+
+
+
+                    <label for="eventLocation">Location:</label>
+
+                    <input type="text" name="eventLocation" required>
+
+
+
+                    <label for="eventDate">Date:</label>
+
+                    <input type="date" name="eventDate" required>
+
+
+
+                    <label for="cinematographers">Cinematographers:</label>
+
+                    <input type="number" name="cinematographers" min="0" required>
+
+
+
+                    <label for="candidPhotographers">Candid Photographers:</label>
+
+                    <input type="number" name="candidPhotographers" min="0" required>
+
+
+
+                    <label for="traditionalPhotographers">Traditional Photographers:</label>
+
+                    <input type="number" name="traditionalPhotographers" min="0" required>
+
+
+
+                    <label for="traditionalVideographers">Traditional Videographers:</label>
+
+                    <input type="number" name="traditionalVideographers" min="0" required>
+
+                </div>
+
+            </div>
+
+            <button type="button" onclick="addEvent()">+ Add Another Event</button>
+
+
+
+            <h2>Deliverables</h2>
+
+            <label for="deliverables">Deliverables with Delivery Date:</label>
+
+            <textarea id="deliverables" name="deliverables" rows="4" required></textarea>
+
+
+
+            <h2>Add-On Services</h2>
+
+            <label for="addOns">Add-On Services (with cost):</label>
+
+            <textarea id="addOns" name="addOns" rows="4"></textarea>
+
+
+
+            <h2>Additional Details</h2>
+
+            <label for="totalCost">Total Cost (incl. GST):</label>
+
+            <input type="number" id="totalCost" name="totalCost" min="0" required>
+
+
+
+            <label for="complimentary">Complimentary Items:</label>
+
+            <textarea id="complimentary" name="complimentary" rows="3"></textarea>
+
+
+
+            <label for="terms">Terms & Conditions:</label>
+
+            <textarea id="terms" name="terms" rows="4"></textarea>
+
+
+
+            <button type="button" onclick="generateQuotation()">Generate Quotation</button>
+
+        </form>
+
+
+
+        <div id="quotationOutput" class="hidden">
+
+            <h2>Photography Quotation</h2>
+
+            <div id="quoteContent"></div>
+
+        </div>
+
+    </main>
+
+    <footer>
+
+        <p>&copy; 2025 Your Photography Business</p>
+
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
