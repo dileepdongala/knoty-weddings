@@ -1,52 +1,52 @@
 function addEvent() {
 
-    const eventSection = document.getElementById('eventSection');
+    const eventSection = document.getElementById("eventSection");
 
-    const newEvent = document.createElement('div');
+    const newEvent = document.createElement("div");
 
-    newEvent.classList.add('event');
+    newEvent.classList.add("event");
 
     newEvent.innerHTML = `
 
         <label>Event Name:</label>
 
-        <input type="text" name="eventName" required>
+        <input type="text" class="eventName" required>
 
-
+        
 
         <label>Location:</label>
 
-        <input type="text" name="eventLocation" required>
+        <input type="text" class="eventLocation" required>
 
-
+        
 
         <label>Date:</label>
 
-        <input type="date" name="eventDate" required>
+        <input type="date" class="eventDate" required>
 
-
+        
 
         <label>Cinematographers:</label>
 
-        <input type="number" name="cinematographers" min="0" required>
+        <input type="number" class="cinematographers" min="0" required>
 
-
+        
 
         <label>Candid Photographers:</label>
 
-        <input type="number" name="candidPhotographers" min="0" required>
+        <input type="number" class="candidPhotographers" min="0" required>
 
-
+        
 
         <label>Traditional Photographers:</label>
 
-        <input type="number" name="traditionalPhotographers" min="0" required>
+        <input type="number" class="traditionalPhotographers" min="0" required>
 
-
+        
 
         <label>Traditional Videographers:</label>
 
-        <input type="number" name="traditionalVideographers" min="0" required>
+        <input type="number" class="traditionalVideographers" min="0" required>
 
     `;
 
@@ -58,106 +58,64 @@ function addEvent() {
 
 function generateQuotation() {
 
-    const bride = document.getElementById('bride').value;
+    const bride = document.getElementById("bride").value;
 
-    const groom = document.getElementById('groom').value;
+    const groom = document.getElementById("groom").value;
 
+    const totalCost = document.getElementById("totalCost").value;
 
+    const deliverables = document.getElementById("deliverables").value.split("\n").filter(x => x.trim());
 
-    const events = Array.from(document.querySelectorAll('.event')).map(event => ({
+    const complimentary = document.getElementById("complimentary").value.split("\n").filter(x => x.trim());
 
-        name: event.querySelector('input[name="eventName"]').value,
-
-        location: event.querySelector('input[name="eventLocation"]').value,
-
-        date: event.querySelector('input[name="eventDate"]').value,
-
-        cinematographers: event.querySelector('input[name="cinematographers"]').value,
-
-        candidPhotographers: event.querySelector('input[name="candidPhotographers"]').value,
-
-        traditionalPhotographers: event.querySelector('input[name="traditionalPhotographers"]').value,
-
-        traditionalVideographers: event.querySelector('input[name="traditionalVideographers"]').value
-
-    }));
-
-
-
-    const deliverables = document.getElementById('deliverables').value;
-
-    const addOns = document.getElementById('addOns').value;
-
-    const totalCost = document.getElementById('totalCost').value;
-
-    const complimentary = document.getElementById('complimentary').value;
-
-    const terms = document.getElementById('terms').value;
+    const terms = document.getElementById("terms").value.split("\n").filter(x => x.trim());
 
 
 
     let quoteHTML = `
 
-        <p><strong>Bride:</strong> ${bride}</p>
+        <div style="text-align: center;">
 
-        <p><strong>Groom:</strong> ${groom}</p>
+            <img src="logo.jpg" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
 
-        <h3>Events</h3>
+            <h2>Dear ${bride} & ${groom},</h2>
 
-        <ul>
+            <p>We value your belief in our work!<br>Discover our services, deliverables, and pricing tailored for your requirements.</p>
 
-    `;
+        </div>
 
+        <h3>List of Events</h3>
 
-
-    events.forEach(event => {
-
-        quoteHTML += `
-
-            <li>
-
-                <strong>${event.name}</strong> - ${event.date} at ${event.location}<br>
-
-                Cinematographers: ${event.cinematographers}, Candid Photographers: ${event.candidPhotographers}, Traditional Photographers: ${event.traditionalPhotographers}, Traditional Videographers: ${event.traditionalVideographers}
-
-            </li>
-
-        `;
-
-    });
-
-
-
-    quoteHTML += `
-
-        </ul>
-
-        <h3>Deliverables</h3>
-
-        <p>${deliverables}</p>
-
-        <h3>Add-On Services</h3>
-
-        <p>${addOns}</p>
-
-        <h3>Total Cost</h3>
-
-        <p>${totalCost}</p>
+        <p>Details of events go here...</p>
 
         <h3>Complimentary Items</h3>
 
-        <p>${complimentary}</p>
+        <ul>${complimentary.map(item => `<li>${item}</li>`).join("")}</ul>
+
+        <h3>Deliverables</h3>
+
+        <ul>${deliverables.map(item => `<li>${item}</li>`).join("")}</ul>
+
+        <h3>Charges</h3>
+
+        <p>Total Cost: ${totalCost}</p>
+
+        <p>50% advance, remaining 50% on shoot day.</p>
+
+        <h3>Hard Drives</h3>
+
+        <p>You must provide 2x 8TB external hard drives.</p>
 
         <h3>Terms & Conditions</h3>
 
-        <p>${terms}</p>
+        <ul>${terms.map(term => `<li>${term}</li>`).join("")}</ul>
 
     `;
 
 
 
-    document.getElementById('quoteContent').innerHTML = quoteHTML;
+    document.getElementById("quotationContainer").innerHTML = quoteHTML;
 
-    document.getElementById('quotationOutput').classList.remove('hidden');
+    document.getElementById("quotationOutput").classList.remove("hidden");
 
 }
