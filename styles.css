@@ -139,3 +139,79 @@ footer {
     padding: 16px !important;
     width: 100%;
 }
+
+.gap-0-imp {
+    gap: 0 !important;
+}
+.flex-direction-row-reverse-imp {
+    flex-direction: row-reverse !important;
+}
+.justify-content-center {
+    justify-content: center;
+}
+.w-100p {
+    width: 100%;
+}
+.gap-152 {
+    gap: 152px;
+}
+
+.p-y-30px {
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+.align-items-center {
+    align-items: center;
+}
+.column {
+    opacity: 1;
+    transition: opacity .5s ease;
+}
+.image_block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.builder .component {
+    border: 1px solid transparent;
+    position: relative;
+}
+.image_block .img_cropper {
+    position: absolute;
+    display: flex;
+    z-index: 1;
+    height: 100%;
+}
+.image_block, .image_block div {
+    width: 100%;
+    border-radius: inherit;
+}
+.builder .block {
+    display: flex;
+    position: relative;
+    border: 2px solid transparent;
+}
+.clienEventsStyling {
+    max-width: 354px;
+    min-height: 223px;
+    align-self: flex-start;
+}
+.et-row .date-location {
+    display: flex;
+    font-size: 15.04px;
+    font-weight: 400;
+}
+.et-row .event-name {
+    font-size: 16.299px;
+    font-weight: 700;
+}
+.et-row .role, .et-row .role span {
+    color: #333;
+    font-size: 15.04px;
+    font-style: normal;
+    line-height: normal;
+}
+.et-row .role {
+    font-weight: 700;
+}
+
