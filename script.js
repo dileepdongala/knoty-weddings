@@ -93,14 +93,14 @@ function generateQuotation() {
 
 
     let quoteHTML = `
-
+<div style="flex-direction: column; background-color: rgb(4, 71, 71);">
 <div style="text-align: center;">
     <div style="display: block;">
         <img src="logo.jpeg" alt="Company Logo" style="width:100px; margin-bottom:20px;">
                 </div>
             </div>
 
-            <div>
+            <div style="text-align: center;>
                 <p>
                     <span
                         style="font-family: california-palms-script, cursive; font-size: 43px; color: rgb(252, 229, 205);">Dear
@@ -141,8 +141,9 @@ function generateQuotation() {
         events.forEach(event => {
 
             quoteHTML += `
+            <div>
     <div style="display: flex;  flex-direction : row; ">
-<li>
+<li style="list-style-type:none">
 
     <div style=" display: inline-block; background-color: rgb(14, 65, 64); width: 300px; padding: 15px; margin:5px;">
         <div>
@@ -177,6 +178,7 @@ function generateQuotation() {
 
 </li>
 <div>
+</div>
     
             `;
     
@@ -186,7 +188,9 @@ function generateQuotation() {
 
        // <ul>${complimentary.map(item => `<li>${item}</li>`).join("")}</ul>
 
-       quoteHTML += ` <div style="text-align : center; background-color: rgb(14, 65, 64); padding:15px; ">
+       quoteHTML += ` 
+       <div>
+       <div style="text-align : center; background-color: rgb(14, 65, 64); padding:15px; ">
             <div style=" font-family: freight-text-pro, serif; font-size: 26px;color: rgb(249, 203, 156);">COMPLIMENTARY COUPLE
         SHOOT</div>
     <div>
@@ -200,7 +204,7 @@ function generateQuotation() {
 
         <h3>Deliverables</h3>
 
-        <ul>${deliverables.map(item => `<li>${item}</li>`).join("")}</ul>
+        <ul style="list-style-type:none">${deliverables.map(item => `<li>${item}</li>`).join("")}</ul>
 
         <h3>Charges</h3>
 
@@ -214,7 +218,9 @@ function generateQuotation() {
 
         <h3>Terms & Conditions</h3>
 
-        <ul>${terms.map(term => `<li>${term}</li>`).join("")}</ul>
+        <ul style="list-style-type:none">${terms.map(term => `<li>${term}</li>`).join("")}</ul>
+        </div>
+        </div>
 
     `;
     const newTab = window.open('','_blank');
