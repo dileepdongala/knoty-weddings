@@ -96,19 +96,7 @@ function generateQuotation() {
 
 <div style="text-align: center;">
     <div style="display: block;">
-        <div class="block" style="flex-direction: column; background-color: rgb(4, 71, 71); background-size: cover; background-position: center center; background-repeat: no-repeat; position: relative; border: none;">
-            <div style="display: flex; padding: 0px; z-index: 1;">
-                <div class="layout d-flex justify-content-center gap-0-imp  flex-direction-row-reverse-imp" style="display: flex; width: 100%; gap: 40px;">
-                    <div class="row w-100p d-flex justify-content-center align-items-center  gap-152 p-y-30px">
-                        <div class="column" style="display: flex; justify-content: center; background-color: transparent;">
-                            <div class="image_block component " style="width: 192px; height: 192px;">
-                                <div class="img_cropper">
-                                    <img src="logo.jpeg" alt="Company Logo"
-                                        style="width:100px; margin-bottom:20px;">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <img src="logo.jpeg" alt="Company Logo" style="width:100px; margin-bottom:20px;">
                 </div>
             </div>
 
@@ -122,9 +110,7 @@ function generateQuotation() {
                     <span style="color: rgb(252, 229, 205);"><br></span>
                 </p>
                 <p>&nbsp;
-                    <span class="variable"
-                        style="font-family: freight-text-pro, serif; font-size: 36px; color: rgb(252, 229, 205);; border-bottom:none; border:none; background:none;"
-                        data-id="619f75683f381fd66dac4b65">
+                    <span style="font-family: freight-text-pro, serif; font-size: 36px; color: rgb(252, 229, 205); border-bottom:none; border:none; background:none;">
                         ${bride} & ${groom}
                     </span>
                 </p><br>
@@ -142,7 +128,7 @@ function generateQuotation() {
 
         </div>
 
-        <div class="column" style=" text-align: center; color: rgb(0, 0, 0); word-break: break-word;">
+        <div style=" text-align: center; color: rgb(0, 0, 0); word-break: break-word;">
                 <div>
                     <p style="font-family: freight-text-pro, serif; font-weight: 400; font-size: 40px;">
                         <span style="color: rgb(249, 203, 156);">
@@ -155,48 +141,62 @@ function generateQuotation() {
         events.forEach(event => {
 
             quoteHTML += `
-    
+    <div style="display: flex;  flex-direction : row; ">
 <li>
 
-    <div class="et-row clienEventsStyling" data-id="00000001c545633e98752569"
-        style="background-color: rgb(14, 65, 64); max-width: 354px;">
-        <div class="date-location">
+    <div style=" display: inline-block; background-color: rgb(14, 65, 64); width: 300px; padding: 15px; margin:5px;">
+        <div>
             <span style="color: rgb(252, 229, 205);">${event.date}</span>,
+            <span>&nbsp;</span>
+            <span>&nbsp;</span>
             <span>&nbsp;</span>
             <span style="color: rgb(252, 229, 205);">${event.location}</span>
         </div>
-        <div class="event-name"
-            style="color: rgb(252, 229, 205); display: flex; gap: 20px; flex-flow: wrap; max-width: 748px; justify-content: flex-start; padding-top: 12px;">
+        <div
+            style="color: rgb(252, 229, 205); display: flex; gap: 20px; flex-flow: wrap; max-width: 748px; justify-content: flex-start; padding-top: 15px;">
             ${event.name}
         </div>
-        <div class="role"
-            style="color: rgb(252, 229, 205); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal;">
+        <div
+            style="color: rgb(252, 229, 205); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
             ${event.candidPhotographers} Candid Photographer
         </div>
-        <div class="role"
-            style="color: rgb(252, 229, 205); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal;">
+        <div
+            style="color: rgb(252, 229, 205); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
             ${event.traditionalPhotographers} Traditional Photographer
         </div>
-        <div class="role"
-            style="color: rgb(252, 229, 205); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal;">
+        <div
+            style="color: rgb(252, 229, 205); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
             ${event.cinematographers} Cinematographer
         </div>
-        <div class="role"
-            style="color: rgb(252, 229, 205); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal;">
+        <div
+            style="color: rgb(252, 229, 205); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px; ">
             ${event.traditionalVideographers} Videographer</div>
-        <div class="desc" style="color: rgb(252, 229, 205);">
         </div>
+         <div class="desc" style="color: rgb(252, 229, 205);">
     </div>
 
 </li>
+<div>
     
             `;
     
         });
 
-       quoteHTML += ` <h3>Complimentary Items</h3>
+       // <h3>Complimentary Items</h3>
 
-        <ul>${complimentary.map(item => `<li>${item}</li>`).join("")}</ul>
+       // <ul>${complimentary.map(item => `<li>${item}</li>`).join("")}</ul>
+
+       quoteHTML += ` <div style="text-align : center; background-color: rgb(14, 65, 64); padding:15px; ">
+            <div style=" font-family: freight-text-pro, serif; font-size: 26px;color: rgb(249, 203, 156);">COMPLIMENTARY COUPLE
+        SHOOT</div>
+    <div>
+        <p><span style="font-family: Georgia, serif; font-size: 16px; color: rgb(252, 229, 205);">Your pre wedding photo
+                shoot, </span></p>
+        <p><span style="font-family: Georgia, serif; font-size: 16px; color: rgb(252, 229, 205);">you will receive a
+                collection of&nbsp;50&nbsp;beautifully</span></p>
+        <p><span style="font-family: Georgia, serif; font-size: 16px; color: rgb(252, 229, 205);"> edited &amp;
+                retouched images in cloud.</span></p>
+    </div>
 
         <h3>Deliverables</h3>
 
