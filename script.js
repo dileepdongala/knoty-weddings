@@ -94,7 +94,7 @@ function generateQuotation() {
 
     let quoteHTML = `
 <div style="flex-direction: column; background-color: rgb(4, 71, 71);">
-<div style="text-align: center;">
+<div>
     <div style="display: block;">
         <img src="logo.jpeg" alt="Company Logo" style="width:100px; margin-bottom:20px;">
                 </div>
@@ -128,9 +128,9 @@ function generateQuotation() {
 
         </div>
 
-        <div style=" text-align: center; color: rgb(0, 0, 0); word-break: break-word;">
+        <div style=" text-align: center;background-color: rgb(4, 71, 71); color: rgb(0, 0, 0); word-break: break-word;">
                 <div>
-                    <p style="font-family: freight-text-pro, serif; font-weight: 400; font-size: 40px;">
+                    <p style="font-family: freight-text-pro, serif; font-weight: 400; font-size: 40px; margin-top: -18px;padding: 90px">
                         <span style="color: rgb(249, 203, 156);">
                         List of Events
                         </span>
@@ -141,7 +141,7 @@ function generateQuotation() {
         events.forEach(event => {
 
             quoteHTML += `
-            <div>
+            <div style="display: flex;  flex-direction : column; ">
     <div style="display: flex;  flex-direction : row; ">
 <li style="list-style-type:none">
 
