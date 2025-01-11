@@ -138,7 +138,7 @@ function generateQuotation() {
     </div>
 
     <div style="display: flex;  flex-direction : column; ">
-        <div style="display: flex;  flex-direction : row; flex-wrap: wrap;">`
+        <div style="justify-content: center;display: flex;  flex-direction : row; flex-wrap: wrap;">`
 
         events.forEach(event => {
 
@@ -183,6 +183,10 @@ function generateQuotation() {
 
        // <ul>${complimentary.map(item => `<li>${item}</li>`).join("")}</ul>
 
+    // <h3>Deliverables</h3>
+
+               // <ul style="list-style-type:none">${deliverables.map(item => `<li>${item}</li>`).join("")}</ul>
+
        quoteHTML += ` 
         </div>
         <div>
@@ -203,9 +207,113 @@ function generateQuotation() {
                 </div>
             </div>
 
-                <h3>Deliverables</h3>
+            <div style="text-align : center;">
+                <p style="font-family: freight-text-pro, serif; font-weight: 400; font-size: 40px;"><span
+                        style="color: rgb(249, 203, 156);">Deliverables</span></p>
+            </div>
 
-                <ul style="list-style-type:none">${deliverables.map(item => `<li>${item}</li>`).join("")}</ul>
+            <div style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 0; opacity: .3;"></div>
+            <div 
+                style="display: flex; flex-direction: column; gap: 40px; width: 100%; justify-content: center; align-items: center; z-index: 1;">
+                <div  style="max-width: 720px; width: 100%; gap: 16px;">
+                    <div
+                        style="display: flex; width: 100%; background-color: rgb(12, 57, 58); position: relative; border-radius: 6px;">
+                        <div style="display: flex; flex-direction: column; width: 100%; padding: 16px; padding: 16px;">
+                            <div style="height: fit-content;"><a style="display: flex;">
+                                    <div>
+                                        <p><span style="font-family: Georgia, serif; font-size: 17px;"><strong
+                                                    style="color: rgb(249, 203, 156);">Photos</strong></span>
+                                        </p>
+                                    </div>
+                                </a><span style="display: flex; margin-bottom: 10px;">
+                                    <p><span style="font-family: Georgia, serif; color: rgb(252, 229, 205);">You
+                                            shall receive&nbsp;<span
+                                                style="border-bottom:none; border:none; background:none;"
+                                                data-id="6752dcfe49dc10123321f903">1500</span>
+                                            handpicked &amp; edited images from all your events
+                                            showcasing your wedding story - delivered
+                                            in&nbsp;&nbsp;<span
+                                                style="border-bottom:none; border:none; background:none;">30</span>&nbsp;
+                                            days.</span>&nbsp;</p>
+                                </span></div>
+                        </div>
+                    </div>
+                    <div
+                        style="display: flex; width: 100%; background-color: rgb(12, 57, 58); position: relative; border-radius: 6px;">
+                        <div style="display: flex; flex-direction: column; width: 100%; padding: 16px;">
+                            <div style="height: fit-content;"><a style="display: flex;">
+                                    <div>
+                                        <p><span style="font-family: Georgia, serif; font-size: 17px;"><strong
+                                                    style="color: rgb(249, 203, 156);">Albums</strong></span>
+                                        </p>
+                                    </div>
+                                </a><span style="display: flex; margin-bottom: 10px;">
+                                    <p><span style="font-family: Georgia, serif; color: rgb(252, 229, 205);">Two
+                                            Premium Designer albums consisting of&nbsp;150&nbsp;images
+                                            in each, designed according to your preferences - delivered
+                                            in&nbsp;25&nbsp;days from the date of selection</span></p>
+                                </span></div>
+                        </div>
+                    </div>
+                    <div
+                        style="display: flex; width: 100%; background-color: rgb(12, 57, 58); position: relative; border-radius: 6px;">
+                        <div style="display: flex; flex-direction: column; width: 100%; padding: 16px;">
+                            <div style="height: fit-content;"><a style="display: flex;">
+                                    <div>
+                                        <p><span style="font-family: Georgia, serif; font-size: 17px;"><strong
+                                                    style="color: rgb(249, 203, 156);">Wedding
+                                                    Film</strong></span>
+                                        </p>
+                                    </div>
+                                </a><span style="display: flex; margin-bottom: 10px;">
+                                    <p><span style="font-family: Georgia, serif; color: rgb(252, 229, 205);">A
+                                            cinematic Film of&nbsp;&nbsp;<span
+                                                style="border-bottom:none; border:none; background:none;">4 -
+                                                6</span>&nbsp;mins with the best footages from all the
+                                            events - delivered in&nbsp;&nbsp;<span
+                                                style="border-bottom:none; border:none; background:none;">90</span>&nbsp;
+                                            days.</span></p>
+                                </span></div>
+                        </div>
+                    </div>
+                    <div
+                        style="display: flex; width: 100%; background-color: rgb(12, 57, 58); position: relative; border-radius: 6px;">
+                        <div style="display: flex; flex-direction: column; width: 100%; padding: 16px;">
+                            <div style="height: fit-content;"><a style="display: flex;">
+                                    <div>
+                                        <p><span style="font-family: Georgia, serif; font-size: 17px;"><strong
+                                                    style="color: rgb(249, 203, 156);">Traditional
+                                                    Videos</strong></span>
+                                        </p>
+                                    </div>
+                                </a><span style="display: flex; margin-bottom: 10px;">
+                                    <p><span style="font-family: Georgia, serif; color: rgb(252, 229, 205);">Full
+                                            Length documented long videos for all the events - delivered
+                                            in &nbsp;<span
+                                                style="border-bottom:none; border:none; background:none;">90</span>
+                                            days.
+                                            <br></span></p>
+                                </span></div>
+                        </div>
+                    </div>
+                    <div
+                        style="display: flex; width: 100%; background-color: rgb(12, 57, 58); position: relative; border-radius: 6px;">
+                        <div style="display: flex; flex-direction: column; width: 100%; padding: 16px;">
+                            <div style="height: fit-content;"><a style="display: flex;">
+                                    <div>
+                                        <p><span style="font-family: Georgia, serif; font-size: 17px;"><strong
+                                                    style="color: rgb(249, 203, 156);">RAW Data</strong></span>
+                                        </p>
+                                    </div>
+                                </a><span style="display: flex; margin-bottom: 10px;">
+                                    <p><span style="font-family: Georgia, serif; color: rgb(252, 229, 205);">All
+                                            Raw data, Edited photos &amp; videos will be delivered in
+                                            Hard drives along with albums.</span></p>
+                                </span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>   
 
                 <h3>Charges</h3>
 
