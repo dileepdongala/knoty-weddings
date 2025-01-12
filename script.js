@@ -96,7 +96,7 @@ function generateQuotation() {
 <div style="flex-direction: column; background-color: rgb(46, 48, 48);">
     <div style="text-align: center;">
         <div style="display: block;">
-            <img src="logo.jpeg" alt="Company Logo" style="width:100px; margin-bottom:20px; margin-bottom:20px !important;">
+            <img src="logo.jpeg" alt="Company Logo" style="width:100px; margin-bottom:20px; margin-top:20px !important;">
         </div>
     </div>
 
@@ -328,38 +328,26 @@ function generateQuotation() {
                     </div>
                 </div>
             </div>   
-            <div style="display: flex; width: 100%; gap: 40px; padding: 20px 0px;">
+            <div style="display: flex; justify-content: center; width: 100%; gap: 40px; padding: 20px 0px;">
                 <div
                     style="display: flex; flex-direction: column; text-align: center; word-break: break-word; min-width: 880px; max-width: 880px;">
                     <div>
                         <p style="line-height: 1.2;"><span
                                 style="font-family: freight-text-pro, serif; color: rgb(249, 203, 156); font-size: 36px;">Charges</span>
                         </p>
-                        <p style="line-height: 1.2;"><br></p>
+                        <p style="line-height: 0.5;"><br></p>
                         <p style="line-height: 1.2;"><span
                                 style="font-family: Georgia, serif; color: rgb(252, 229, 205); font-size: 36px;">₹&nbsp;<span
                                     style="border-bottom:none; border:none; background:none;">${totalCost}</span></span>
                         </p>
-                        <p style="line-height: 1.2;"><span
-                                style="font-family: Georgia, serif; color: rgb(252, 229, 205); font-size: 18px;"><br></span>
-                        </p>
                         <p><span style="font-family: Georgia, serif; color: rgb(252, 229, 205); font-size: 18px;">+GST
                                 18%</span></p>
-                        <p style="text-align: left;"><span
-                                style="font-family: Georgia, serif; color: rgb(252, 229, 205); font-size: 18px;"><br></span>
-                        </p>
                         <p style="text-align: center;"><span
                                 style="font-family: Georgia, serif; color: rgb(252, 229, 205); font-size: 18px;">50%
                                 to be paid in advance to block the dates.</span></p>
                         <p style="text-align: center;"><span
-                                style="font-family: Georgia, serif; color: rgb(252, 229, 205); font-size: 18px;">✧</span>
-                        </p>
-                        <p style="text-align: center;"><span
                                 style="font-family: Georgia, serif; color: rgb(252, 229, 205); font-size: 18px;">
                                 Remaining 50% Payment shall be done on last day of shoot.</span></p>
-                        <p style="text-align: center;"><span
-                                style="font-family: Georgia, serif; color: rgb(252, 229, 205); font-size: 18px;">✧</span>
-                        </p>
                         <p style="text-align: center;"><span
                                 style="font-family: Georgia, serif; color: rgb(252, 229, 205); font-size: 18px;">Deliverables
                                 timeline starts from the date of full payment clearance.</span></p>
@@ -367,7 +355,7 @@ function generateQuotation() {
                 </div>
             </div>
 
-            <div style="display: flex; width: 100%; gap: 40px; padding: 20px 0px;">
+            <div style="display: flex; justify-content: center; width: 100%; gap: 40px; padding: 20px 0px;">
                 <div
                     style="display: none; flex-direction: column; text-align: center; word-break: break-word; min-width: 880px; max-width: 880px;">
                     <div style="height: 100%;">
@@ -393,7 +381,7 @@ function generateQuotation() {
                 </div>
             </div>
 
-            <div style="display: flex; width: 100%; gap: 40px; padding: 20px 0px;">
+            <div style="display: flex; justify-content: center; width: 100%; gap: 40px; padding: 20px 0px;">
                 <div
                     style="display: none; flex-direction: column; text-align: center; word-break: break-word; min-width: 880px; max-width: 880px;">
                     <div style="height: 100%;">
@@ -438,7 +426,7 @@ function generateQuotation() {
                 </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; width: 100%; gap: 40px; padding: 20px 0px;">
+            <div style="display: flex; flex-direction: column; justify-content: center; width: 100%; gap: 40px; padding: 20px 0px;">
                 <div
                     style="display: flex; flex-direction: column; text-align: center; word-break: break-word; min-width: 880px; max-width: 880px;">
                     <div>
