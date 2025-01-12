@@ -425,7 +425,7 @@ function generateQuotation() {
                     </div>
                 </div>
             </div>
-
+<div style="justify-content: center;">
             <div style="display: flex; flex-direction: column; justify-content: center; width: 100%; gap: 40px; padding: 20px 0px;">
                 <div
                     style="display: flex; flex-direction: column; text-align: center; word-break: break-word; min-width: 880px; max-width: 880px;">
@@ -512,6 +512,7 @@ function generateQuotation() {
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
 
             
