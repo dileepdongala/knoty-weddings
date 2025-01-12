@@ -96,7 +96,7 @@ function generateQuotation() {
 <div style="flex-direction: column; background-color: rgb(46, 48, 48);">
     <div style="text-align: center;">
         <div style="display: block;">
-            <img src="logo.jpeg" alt="Company Logo" style="width:100px; margin-bottom:20px;">
+            <img src="logo.jpeg" alt="Company Logo" style="width:100px; margin-bottom:20px; margin-bottom:20px;">
         </div>
     </div>
 
@@ -145,7 +145,7 @@ function generateQuotation() {
             quoteHTML += `
             <li style="list-style-type:none">
                 <div
-                    style=" display: inline-block; background-color: rgb(14, 65, 64); width: 300px; padding: 15px; margin:5px;">
+                    style=" display: inline-block; background-color: rgb(14, 65, 64); width: 300px; padding: 15px; margin:5px; border-radius: 15px;">
                     <div>
                         <span style="color: rgb(252, 229, 205);">${event.date}</span>,
                         <span>&nbsp;</span>
