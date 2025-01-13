@@ -1,217 +1,76 @@
 body {
-
-    font-family: 'Arial', sans-serif;
-
-    background-color: #fcfaf6;;
-
-    color: #333;
-
+    font-family: Arial, sans-serif;
     margin: 0;
-
     padding: 0;
-
-}
-
-
-
-header {
-
-    background: #4CAF50;
-
+    background-color: rgb(46, 48, 48);
+  }
+  
+  header {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: rgb(22, 1 , 1);
     color: white;
-
-    padding: 1rem;
-
-    text-align: center;
-
-}
-
-
-
-main {
-
-    max-width: 900px;
-
-    margin: 2rem auto;
-
-    padding: 1rem;
-
-    background: white;
-
-    border-radius: 8px;
-
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-}
-
-
-
-section {
-
-    margin-bottom: 2rem;
-
-}
-
-
-
-label {
-
-    display: block;
-
-    margin-bottom: 0.5rem;
-
-    font-weight: bold;
-
-}
-
-
-
-input, textarea, button {
-
-    width: 100%;
-
-    padding: 0.8rem;
-
-    margin-bottom: 1rem;
-
-    border: 1px solid #ddd;
-
-    border-radius: 4px;
-
-    font-size: 1rem;
-
-}
-
-
-
-button {
-
-    background: #4CAF50;
-
-    color: white;
-
+  }
+  
+  button {
+    padding: 10px 15px;
     border: none;
-
-    cursor: pointer;
-
-}
-
-
-
-button:hover {
-
-    background: #45a049;
-
-}
-
-
-
-.hidden {
-
-    display: none;
-
-}
-
-
-
-footer {
-
-    text-align: center;
-
-    padding: 1rem;
-
-    background: #4CAF50;
-
+    background-color: #b37400;
     color: white;
-
-}
-
-.et-row {
-    display: flex
-;
+    cursor: pointer;
+    border-radius: 15px;
+    margin: 10px;
+  }
+  
+  button:hover {
+    background-color: #003d80;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  #quotationTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+  
+  #quotationTable th, #quotationTable td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    color : rgb(209, 237, 57);
+  }
+  
+  form {
+    display: flex;
     flex-direction: column;
     gap: 10px;
-    max-width: 720px;
-    margin-bottom: 10px !important;
-    border-radius: 6px;
-    background: #fcfaf6;
-    box-shadow: 0 0 4px 0 rgba(0, 0, 0, .12);
-    padding: 16px !important;
-    width: 100%;
-}
+    padding: 20px;
+    background-color: rgb(22, 1 , 1);
+    border: 1px solid #ccc;
+    margin: 20px;
+  }
+  
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: rgb(249, 203, 156);
+    margin : 5px;
+  }
 
-.gap-0-imp {
-    gap: 0 !important;
-}
-.flex-direction-row-reverse-imp {
-    flex-direction: row-reverse !important;
-}
-.justify-content-center {
-    justify-content: center;
-}
-.w-100p {
-    width: 100%;
-}
-.gap-152 {
-    gap: 152px;
-}
-
-.p-y-30px {
-    padding-top: 30px;
-    padding-bottom: 30px;
-}
-.align-items-center {
-    align-items: center;
-}
-.column {
-    opacity: 1;
-    transition: opacity .5s ease;
-}
-.image_block {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.builder .component {
-    border: 1px solid transparent;
-    position: relative;
-}
-.image_block .img_cropper {
-    position: absolute;
-    display: flex;
-    z-index: 1;
-    height: 100%;
-}
-.image_block, .image_block div {
-    width: 100%;
-    border-radius: inherit;
-}
-.builder .block {
-    display: flex;
-    position: relative;
-    border: 2px solid transparent;
-}
-.clienEventsStyling {
-    max-width: 354px;
-    min-height: 223px;
+  a,h2 {
+    color : rgb(209, 237, 57);
+  }
+  
+  #addEventBtn {
     align-self: flex-start;
-}
-.et-row .date-location {
-    display: flex;
-    font-size: 15.04px;
-    font-weight: 400;
-}
-.et-row .event-name {
-    font-size: 16.299px;
-    font-weight: 700;
-}
-.et-row .role, .et-row .role span {
-    color: #333;
-    font-size: 15.04px;
-    font-style: normal;
-    line-height: normal;
-}
-.et-row .role {
-    font-weight: 700;
-}
+  }
 
+  input,textarea {
+    width : 80%;
+  }
+  
