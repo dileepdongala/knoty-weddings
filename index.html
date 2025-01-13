@@ -1,175 +1,173 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Knoty Weddings Quotation Generator</title>
-
+    <title>Knoty Weddings Quotation Manager</title>
     <link rel="stylesheet" href="styles.css">
-
-    <script src="script.js" defer></script>
-
 </head>
 
 <body>
-
     <header>
-
         <h1>Knoty Weddings Quotation Generator</h1>
-
     </header>
+    <div class="container">
+        <div class="buttons">
+            <button id="createQuotation">Create Quotation</button>
+            <button id="fetchQuotations">Fetch Quotations</button>
+        </div>
+        <table id="quotationTable">
+            <thead>
+                <tr>
+                    <th>Bride Name</th>
+                    <th>Groom Name</th>
+                    <th>Creation Date</th>
+                    <th>Price</th>
+                    <th>Quotation URL</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div id="formContainer" class="hidden">
+            <h3>Create Quotation</h3>
+            <form id="quotationForm">
+                <section>
 
-    <main>
+                    <h2>Client Details</h2>
 
-        <form id="quotationForm">
+                    <label for="brideName">Bride's Name:</label>
 
-            <section>
-
-                <h2>Client Details</h2>
-
-                <label for="bride">Bride's Name:</label>
-
-                <input type="text" id="bride" required>
-
-                
-
-                <label for="groom">Groom's Name:</label>
-
-                <input type="text" id="groom" required>
-
-            </section>
-
-
-
-            <h2>Event Details</h2>
-
-            <div id="eventSection">
-
-                <div class="event">
-
-                    <label for="eventName">Event Name:</label>
-
-                    <input type="text" name="eventName" required>
+                    <input type="text" id="brideName" required>
 
 
 
-                    <label for="eventLocation">Location:</label>
+                    <label for="groomName">Groom's Name:</label>
 
-                    <input type="text" name="eventLocation" required>
+                    <input type="text" id="groomName" required>
 
-
-
-                    <label for="eventDate">Date:</label>
-
-                    <input type="date" name="eventDate" required>
+                </section>
 
 
 
-                    <label for="cinematographers">Cinematographers:</label>
+                <h2>Event Details</h2>
 
-                    <input type="number" name="cinematographers" min="0" required>
+                <div id="eventSection">
 
+                    <div class="event">
 
+                        <label for="eventName">Event Name:</label>
 
-                    <label for="candidPhotographers">Candid Photographers:</label>
-
-                    <input type="number" name="candidPhotographers" min="0" required>
-
-
-
-                    <label for="traditionalPhotographers">Traditional Photographers:</label>
-
-                    <input type="number" name="traditionalPhotographers" min="0" required>
+                        <input type="text" name="eventName" required>
 
 
 
-                    <label for="traditionalVideographers">Traditional Videographers:</label>
+                        <label for="eventLocation">Location:</label>
 
-                    <input type="number" name="traditionalVideographers" min="0" required>
+                        <input type="text" name="eventLocation" required>
+
+
+
+                        <label for="eventDate">Date:</label>
+
+                        <input type="date" name="eventDate" required>
+
+
+
+                        <label for="cinematographers">Cinematographers:</label>
+
+                        <input type="number" name="cinematographers" min="0" required>
+
+
+
+                        <label for="candidPhotographers">Candid Photographers:</label>
+
+                        <input type="number" name="candidPhotographers" min="0" required>
+
+
+
+                        <label for="traditionalPhotographers">Traditional Photographers:</label>
+
+                        <input type="number" name="traditionalPhotographers" min="0" required>
+
+
+
+                        <label for="traditionalVideographers">Traditional Videographers:</label>
+
+                        <input type="number" name="traditionalVideographers" min="0" required>
+
+                    </div>
 
                 </div>
 
-            </div>
-
-            <button type="button" onclick="addEvent()">+ Add Another Event</button>
+                <button type="button" onclick="addEvent()">+ Add Another Event</button>
 
 
 
-            <section>
+                <section>
 
-                <h2>Deliverables</h2>
+                    <h2>Deliverables</h2>
 
-                <textarea id="deliverables" rows="4" disabled>1. You shall receive 1500 handpicked & edited images from all your events showcasing your wedding story - delivered in 30 days.
+                    <textarea id="deliverables" rows="4" disabled>1. You shall receive 1500 handpicked & edited images from all your events showcasing your wedding story - delivered in 30 days.
 
 2. Two Premium Designer albums consisting of 150 images in each, designed according to your preferences - delivered in 25 days from the date of selection.
 
-                </textarea>
+            </textarea>
 
-            </section>
-
-
-
-            <section>
-
-                <h2>Add-On Services</h2>
-
-                <textarea id="addons" rows="4" placeholder="Enter add-on services with cost" disabled></textarea>
-
-            </section>
+                </section>
 
 
 
-            <section>
+                <section>
 
-                <h2>Complimentary Items</h2>
+                    <h2>Add-On Services</h2>
 
-                <textarea id="complimentary" rows="4" disabled>1. Your pre-wedding photo shoot, you will receive a collection of 50 beautifully edited & retouched images in cloud.</textarea>
+                    <textarea id="addons" rows="4" placeholder="Enter add-on services with cost" disabled></textarea>
 
-            </section>
-
-
-
-            <section>
-
-                <h2>Payment & Cost</h2>
-
-                <label for="totalCost">Total Cost (including GST):</label>
-
-                <input type="number" id="totalCost" min="0" required>
-
-            </section>
+                </section>
 
 
 
-            <section>
+                <section>
 
-                <h2>Terms & Conditions</h2>
+                    <h2>Complimentary Items</h2>
 
-                <textarea id="terms" rows="4" disabled>1. For events held at locations distant from our office, you shall arrange travel & accommodation for our shoot crew to ensure seamless service.
+                    <textarea id="complimentary" rows="4"
+                        disabled>1. Your pre-wedding photo shoot, you will receive a collection of 50 beautifully edited & retouched images in cloud.</textarea>
+
+                </section>
+
+
+
+                <section>
+
+                    <h2>Payment & Cost</h2>
+
+                    <label for="price">Total Cost (including GST):</label>
+
+                    <input type="number" id="price" min="0" required>
+
+                </section>
+
+
+
+                <section>
+
+                    <h2>Terms & Conditions</h2>
+
+                    <textarea id="terms" rows="4"
+                        disabled>1. For events held at locations distant from our office, you shall arrange travel & accommodation for our shoot crew to ensure seamless service.
 
 2. Cancellation after advance payment & team reservation will incur a 25% fee of the total order value. The remaining amount will be refunded within 90 days.</textarea>
 
-            </section>
+                </section>
 
-
-
-            <button type="button" onclick="generateQuotation()">Generate Quotation</button>
-
-        </form>
-
-    </main>
-
-    <footer>
-
-        <p>&copy; 2025 Photography Business</p>
-
-    </footer>
-
+                <button type="submit">Create</button>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 
 </html>
