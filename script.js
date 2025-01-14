@@ -63,8 +63,10 @@ async function addQuotation(quotation) {
     console.error("Error adding document:", error);
   }
 
-  const updatedData = { url: documentUrl };
-  await updateDoc(documentId, updatedData);
+    const updatedData = {
+    ['url']: documentUrl, // Dynamically set the field to update
+  };
+  await updateDoc(docRef, updatedData);
 
   document.getElementById("formContainer").classList.toggle("hidden");
 
