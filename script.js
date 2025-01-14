@@ -1,86 +1,137 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
 const dbName = "quotationsDB";
 const storeName = "quotations";
 let db;
+let documentId;
+let documentRef;
+let documentUrl;
 
-// Initialize IndexedDB
+// Initialize fireBase
 function initDB() {
-  const request = indexedDB.open(dbName, 1);
-
-  request.onupgradeneeded = (event) => {
-    db = event.target.result;
-    db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+  // Your Firebase configuration object
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIA7kvRB9QIovVY7JmYjvG4C8nCvEoCFQ",
+    authDomain: "test-ddr.firebaseapp.com",
+    projectId: "test-ddr",
+    storageBucket: "test-ddr.firebasestorage.app",
+    messagingSenderId: "295918037477",
+    appId: "1:295918037477:web:eb751a64d1a81094ee670c"
   };
 
-  request.onsuccess = (event) => {
-    db = event.target.result;
-  };
-
-  request.onerror = () => {
-    console.error("Error opening database.");
-  };
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
 }
 
-// Add a quotation to IndexedDB
-function addQuotation(quotation) {
-  const transaction = db.transaction([storeName], "readwrite");
-  const store = transaction.objectStore(storeName);
-  store.add(quotation);
-}
+// Add a quotation to fireBase
+async function addQuotation(quotation) {
 
-// Fetch quotations from IndexedDB
-function fetchQuotations() {
-  const transaction = db.transaction([storeName], "readonly");
-  const store = transaction.objectStore(storeName);
+  // Add data
+  const now = new Date();
 
-  const request = store.getAll();
+  const day = now.getDate().toString().padStart(2, '0');
+  const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+  const year = now.getFullYear().toString().slice(-2);
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
 
-  request.onsuccess = () => {
-    displayQuotations(request.result);
+  const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}`;
+
+  const quotationCollectionRef = collection(db, "Quotations"); // Reference to the 'Quotations' collection
+
+  const quotationData = {
+    //id: Date.now() + Math.random(),
+    bride: quotation.brideName,
+    groom: quotation.groomName,
+    price: quotation.price,
+    created_date: formattedDateTime,
+    events: quotation.events
   };
+  try {
+    const docRef = await addDoc(quotationCollectionRef, quotationData);
+    console.log("Document written with ID:", docRef.id);
+    documentRef = docRef;
+    documentId = docRef.id;
+    console.log('Document written with ID:', docRef.id);
+    documentUrl = `quotation.html?id=${documentId}`;
 
-  request.onerror = () => {
-    console.error("Error fetching quotations.");
-  };
-}
+    // Open the quotation in a new tab
+    window.open(documentUrl, "_blank")
+  } catch (error) {
+    console.error("Error adding document:", error);
+  }
 
-// Delete a quotation from IndexedDB
-function deleteQuotation(id) {
-  const transaction = db.transaction([storeName], "readwrite");
-  const store = transaction.objectStore(storeName);
-  store.delete(id);
+  const updatedData = { url: documentUrl };
+  await updateDoc(documentId, updatedData);
+
+  document.getElementById("formContainer").classList.toggle("hidden");
+
   fetchQuotations();
+
 }
 
-// Display quotations in the table
-function displayQuotations(quotations) {
-  const tableBody = document.querySelector("#quotationTable tbody");
-  tableBody.innerHTML = "";
+// Fetch quotations from fireBase
+async function fetchQuotations() {
 
-  quotations.forEach((quotation) => {
-    const row = document.createElement("tr");
+  const quotationCollectionRef = collection(db, "Quotations"); // Reference to the 'Quotations' collection
+  try {
+    const querySnapshot = await getDocs(quotationCollectionRef);
+    const tableBody = document.querySelector("#quotationTable tbody");
+    tableBody.innerHTML = "";
+    querySnapshot.forEach((doc) => {
+      console.log(`${doc.id}:`, doc.data());
+      const quotation = doc.data();
+      const row = document.createElement("tr");
+      let quoteHTML = `
+          <td>${quotation.bride}</td>
+          <td>${quotation.groom}</td>
+          <td>${quotation.created_date}</td>
+          <td>${quotation.price}</td>
+          <td><a href="${quotation.url}" target="_blank">Open</a></td>`
+      if (quotation.expired) {
+        quoteHTML += `<td style = "background-color : red">Expired</td>`
+      } else {
+        quoteHTML += `<td><button value="${doc.id}" id="expireQuotation-${doc.id}">Expire</button></td>`
+      }
+      ;
+      row.innerHTML = quoteHTML;
+      tableBody.appendChild(row);
+    });
 
-    row.innerHTML = `
-      <td>${quotation.brideName}</td>
-      <td>${quotation.groomName}</td>
-      <td>${quotation.creationDate}</td>
-      <td>${quotation.price}</td>
-      <td><a href="${quotation.url}" target="_blank">Open</a></td>
-      <td><button onclick="deleteQuotation(${quotation.id})">Expire</button></td>
-    `;
+  } catch (error) {
+    console.error("Error fetching Quotations:", error);
+  }
+}
 
-    tableBody.appendChild(row);
-  });
+// Delete a quotation from fireBase
+async function expireQuotation(documentId) {
+
+  try {
+    const docRef = doc(db, 'Quotations', documentId);
+
+    const updatedData = {
+      ['expired']: true, // Dynamically set the field to update
+    };
+    //await deleteDoc(quotationCollectionRef); // Deletes the document
+    await updateDoc(docRef, updatedData);
+    console.log("Quotation expired successfully!");
+    fetchQuotations();
+  } catch (error) {
+    console.error("Error expiring Quotation:", error);
+  }
 }
 
 function addEvent() {
 
-    const eventSection = document.getElementById('eventSection');
+  const eventSection = document.getElementById('eventSection');
 
-    const newEvent = document.createElement('div');
+  const newEvent = document.createElement('div');
 
-    newEvent.classList.add('event');
+  newEvent.classList.add('event');
 
-    newEvent.innerHTML = `
+  newEvent.innerHTML = `
 
         <label>Event Name:</label>
 <input type="text" name="eventName" required>
@@ -99,7 +150,7 @@ function addEvent() {
 
     `;
 
-    eventSection.appendChild(newEvent);
+  eventSection.appendChild(newEvent);
 
 }
 
@@ -110,53 +161,50 @@ document.getElementById("createQuotation").addEventListener("click", () => {
 
 document.getElementById("fetchQuotations").addEventListener("click", fetchQuotations);
 
+document.getElementById("addEvent").addEventListener("click", addEvent);
+
+/*document.getElementById("expireQuotation").addEventListener("click", (event) => {
+  expireQuotation(event.value);
+});*/
+
+document.getElementById('quotationTable').addEventListener('click', (event) => {
+  // Check if the clicked element is a button with an ID starting with 'expire'
+  if (event.target && event.target.id.startsWith('expireQuotation')) {
+    console.log(`Button ${event.target.id} clicked!`);
+    expireQuotation(event.target.value);
+  }
+});
+
 document.getElementById("quotationForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-  
-    const brideName = document.getElementById("brideName").value;
-    const groomName = document.getElementById("groomName").value;
-    const events = Array.from(document.querySelectorAll('.event')).map(event => ({
+  event.preventDefault();
 
-        name: event.querySelector('input[name="eventName"]').value,
+  const brideName = document.getElementById("brideName").value;
+  const groomName = document.getElementById("groomName").value;
+  const events = Array.from(document.querySelectorAll('.event')).map(event => ({
 
-        location: event.querySelector('input[name="eventLocation"]').value,
+    name: event.querySelector('input[name="eventName"]').value,
 
-        date: event.querySelector('input[name="eventDate"]').value,
+    location: event.querySelector('input[name="eventLocation"]').value,
 
-        cinematographers: event.querySelector('input[name="cinematographers"]').value,
+    date: event.querySelector('input[name="eventDate"]').value,
 
-        candidPhotographers: event.querySelector('input[name="candidPhotographers"]').value,
+    cinematographers: event.querySelector('input[name="cinematographers"]').value,
 
-        traditionalPhotographers: event.querySelector('input[name="traditionalPhotographers"]').value,
+    candidPhotographers: event.querySelector('input[name="candidPhotographers"]').value,
 
-        traditionalVideographers: event.querySelector('input[name="traditionalVideographers"]').value
+    traditionalPhotographers: event.querySelector('input[name="traditionalPhotographers"]').value,
 
-    }));
-    const creationDate = `${Date.now()}`;
-    const price = document.getElementById("price").value;
-  
-    const transaction = db.transaction([storeName], "readwrite");
-    const store = transaction.objectStore(storeName);
-  
-    const quotation = { brideName, groomName, events, creationDate, price };
-    
-    const request = store.add(quotation);
-  
-    request.onsuccess = (event) => {
-      const id = event.target.result;
-      const url = `quotation.html?id=${id}`;
-      quotation.url = url; // Update the URL with the ID for display in the table.
-  
-      // Update the record in IndexedDB with the URL
-      const updateTransaction = db.transaction([storeName], "readwrite");
-      const updateStore = updateTransaction.objectStore(storeName);
-      updateStore.put({ ...quotation, id });
-  
-      // Open the quotation in a new tab
-      window.open(url, "_blank");
-    };
-  });
-  
+    traditionalVideographers: event.querySelector('input[name="traditionalVideographers"]').value
+
+  }));
+  const creationDate = `${Date.now()}`;
+  const price = document.getElementById("price").value;
+
+  const quotation = { brideName, groomName, events, creationDate, price };
+
+  addQuotation(quotation);
+});
+
 
 // Initialize the database
 initDB();
