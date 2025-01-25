@@ -17,8 +17,8 @@ let addGst;
 let validUpTo;
 // Array of month names
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-var a = ['','One ','Two ','Three ','Four ', 'Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
-var b = ['', '', 'Twenty','Thirty','Forty','Fifty', 'Sixty','Seventy','Eighty','Ninety'];
+var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
 
 
 // Initialize IndexedDB
@@ -178,7 +178,7 @@ async function getEventsElemet() {
         eventsHTML += `
             <li style="list-style-type:none">
                 <div
-                    style=" display: inline-block; background-color: #134251; width: 300px; padding: 15px; margin:5px; border-radius: 15px;">
+                    style=" display: inline-block; background-color: #134251; min-height: 116px; width: 300px; padding: 15px; margin:5px; border-radius: 15px;">
                     <div>
                         <span>&#128198;</span>
                         <span style="color: rgb(242, 243, 237);">${eventDate}</span>
@@ -189,19 +189,25 @@ async function getEventsElemet() {
                         <span style="color: rgb(242, 243, 237);">${event.location}</span>
                     </div>
                     <div
-                        style="font-size:20px; color: rgb(242, 243, 237); display: flex; gap: 20px; flex-flow: wrap; max-width: 748px; justify-content: flex-start; padding-top: 15px; font-weight: 1000">
+                        style="color: rgb(242, 243, 237); display: flex; gap: 20px; flex-flow: wrap; max-width: 748px; justify-content: flex-start; padding-top: 15px; font-weight: 1000">
                         ${event.name}
-                    </div>
-                    <div
-                        style="font-size:20px; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
+                    </div>`;
+        if (event.photographers != '0') {
+            eventsHTML += ` <div
+                        style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
                         <span>&#128247;</span> 
                          ${event.photographers} Photographers
-                    </div>
-                    <div
-                        style="font-size:20px; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
+                    </div>`;
+        }
+        if (event.videographers != '0') {
+            eventsHTML += `  <div
+                        style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
                         <span>&#127909;</span>
                         ${event.videographers} Videographers
-                    </div>
+                    </div>`;
+        }
+
+        eventsHTML += `     
                 </div>
                 <div class="desc" style="color: rgb(242, 243, 237);">
                 </div>
@@ -308,7 +314,7 @@ async function getDeliverablesElement() {
     return deliverables_HTML;
 }
 
-function inWords (num) {
+function inWords(num) {
     if ((num = num.toString()).length > 9) return 'overflow';
     var n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
     if (!n) return; var str = '';
@@ -338,7 +344,7 @@ async function getPriceDetailsElement() {
                         style="border-bottom:none; border:none; background:none;">${totalCost}</span></span>
             </p>
             <p style="line-height: 1.2;"><span
-                        style="color: rgb(242, 243, 237); font-size: 20px; border-bottom:none; border:none; background:none;">( ${priceInWords} Rupees )</span>
+                        style="color: rgb(242, 243, 237); font-size: 18px; border-bottom:none; border:none; background:none;">( ${priceInWords} Rupees )</span>
             </p>`
     const data = await getDocumentData(SEEDED_DATA_COLL, CHARGES_DOC_ID)
     let count = 0;
@@ -449,14 +455,14 @@ async function getTermsAndConditionsElement() {
 }
 
 // Disable right-click context menu
-document.addEventListener("contextmenu", (e) => e.preventDefault());
+// document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-// Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-document.addEventListener("keydown", (e) => {
-  if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'U')) {
-    e.preventDefault();
-  }
-});
+// // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+// document.addEventListener("keydown", (e) => {
+//   if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'U')) {
+//     e.preventDefault();
+//   }
+// });
 
 // Initialize the database and fetch the quotation
 initDB();
