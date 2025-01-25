@@ -17,6 +17,8 @@ let addGst;
 let validUpTo;
 // Array of month names
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var a = ['','One ','Two ','Three ','Four ', 'Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+var b = ['', '', 'Twenty','Thirty','Forty','Fifty', 'Sixty','Seventy','Eighty','Ninety'];
 
 
 // Initialize IndexedDB
@@ -43,7 +45,9 @@ async function fetchQuotation() {
     const id = idURL.split(":::")[1];
 
     if (!id) {
-        document.getElementById("details").textContent = "Invalid ID.";
+        document.getElementById("details").innerHTML = `<p style="font-family:cursive; font-size:28px; font-weight: 400; ">
+        <span style="color: rgb(231, 239, 208);">❗❗❗Something strange happened. Please contact us ❗❗❗ </span>
+    </p>`;
         return;
     }
 
@@ -52,11 +56,12 @@ async function fetchQuotation() {
         const docSnap = await getDoc(quotationDocRef); // Fetch the document snapshot
 
         if (docSnap.exists()) {
-            console.log("User data:", docSnap.data());
             const quotation = docSnap.data();
 
             if (quotation && quotation.status == "Expired") {
-                document.getElementById("details").textContent = "Quotation is expired. Please contact us";
+                document.getElementById("details").innerHTML = `<p style="font-family:cursive; font-size:28px; font-weight: 400; ">
+            <span style="color: rgb(231, 239, 208);">❗❗❗ Quotation is Expired. Please contact us ❗❗❗ </span>
+        </p>`;
             } else if (quotation && quotation.status != "Expired") {
                 title = quotation.title;
                 totalCost = quotation.price;
@@ -303,7 +308,21 @@ async function getDeliverablesElement() {
     return deliverables_HTML;
 }
 
+function inWords (num) {
+    if ((num = num.toString()).length > 9) return 'overflow';
+    var n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+    if (!n) return; var str = '';
+    str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+    str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+    str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+    str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+    str += (n[5] != 0) ? ((str != '') ? 'And ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only ' : '';
+    return str;
+}
+
+
 async function getPriceDetailsElement() {
+    const priceInWords = inWords(totalCost);
     let charges_HTML =
         `<div style="display: flex; justify-content: center; width: 100%; padding: 20px 0px;">
         <div style="display: flex; justify-content: center; padding: 20px 0px; background-color: #134251; padding: 30px; margin: 30px; border-radius: 30px;">
@@ -317,6 +336,9 @@ async function getPriceDetailsElement() {
             <p style="line-height: 1.2;"><span
                     style="color: rgb(242, 243, 237); font-size: 36px;">₹&nbsp;<span
                         style="border-bottom:none; border:none; background:none;">${totalCost}</span></span>
+            </p>
+            <p style="line-height: 1.2;"><span
+                        style="color: rgb(242, 243, 237); font-size: 20px; border-bottom:none; border:none; background:none;">( ${priceInWords} Rupees )</span>
             </p>`
     const data = await getDocumentData(SEEDED_DATA_COLL, CHARGES_DOC_ID)
     let count = 0;
@@ -426,7 +448,7 @@ async function getTermsAndConditionsElement() {
     return termsAndConditions_HTML;
 }
 
-// Disable right-click context menu
+Disable right-click context menu
 document.addEventListener("contextmenu", (e) => e.preventDefault());
 
 // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
