@@ -448,7 +448,7 @@ async function getTermsAndConditionsElement() {
     return termsAndConditions_HTML;
 }
 
-Disable right-click context menu
+// Disable right-click context menu
 document.addEventListener("contextmenu", (e) => e.preventDefault());
 
 // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
