@@ -62,10 +62,9 @@ async function addQuotation(quotation) {
 
   const today = new Date();
   today.setDate(today.getDate() + 7);
-  let formatedToday = today.toLocaleDateString('en-US', options).replace(',', '');
-
-  // Format the date as dd-MMM-yyyy
+    // Format the date as dd-MMM-yyyy
   const options = { day: '2-digit', month: 'short', year: 'numeric' };
+  let formatedToday = today.toLocaleDateString('en-US', options).replace(',', '');
 
   const quotationCollectionRef = collection(db, QUOTATION_COLL); // Reference to the 'Quotations' collection
 
