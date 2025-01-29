@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Knoty Weddings</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 </head>
 
@@ -32,9 +33,10 @@
                     <th>Title</th>
                     <th>Price</th>
                     <th>Quotation</th>
+                    <th>Mobile</th>
+                    <th>Share</th>
                     <th>Status</th>
                     <th>Action</th>
-                    <th>Sent</th>
                     <th>Reject</th>
                     <th>Accept</th>
                     <th>Delete</th>
@@ -48,9 +50,15 @@
             <form id="quotationForm">
                 <section>
                     <h2>Client Details</h2>
+                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; ">
                     <div style="display: flex; flex-direction: row; width:50%">
                         <label for="title">Title :</label>
                         <input type="text" id="title" required>
+                    </div>
+                    <div style="display: flex; flex-direction: row; width:50%">
+                        <label for="mobile">Mobile :</label>+91<span>&nbsp;</span>
+                        <input type="text" id="mobile" required>
+                    </div>
                     </div>
                 </section>
 
@@ -88,36 +96,36 @@
                                 </label>
                             </div>
                         </div>
-                        <!-- <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
+                        <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="cinematographers">🎥 Cinematographers:</label>
-                                <input type="number" name="cinematographers" min="0" value="0" required>
+                                <input type="number" name="cinematographers" min="0" value="1" required>
                             </div>
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="candidPhotographers">📷 Candid Photographers:</label>
-                                <input type="number" name="candidPhotographers" min="0" value="0" required>
+                                <input type="number" name="candidPhotographers" min="0" value="1" required>
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
+                             <div style="display: flex; flex-direction: row; width:50%">
+                                <label for="traditionalVideographers">📹 Traditional Videographers:</label>
+                                <input type="number" name="traditionalVideographers" min="0" value="1" required>
+                            </div>
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="traditionalPhotographers">📸 Traditional Photographers:</label>
-                                <input type="number" name="traditionalPhotographers" min="0" value="0" required>
+                                <input type="number" name="traditionalPhotographers" min="0" value="1" required>
                             </div>
-                            <div style="display: flex; flex-direction: row; width:50%">
-                                <label for="traditionalVideographers">📹 Traditional Videographers:</label>
-                                <input type="number" name="traditionalVideographers" min="0" value="0" required>
-                            </div>
-                        </div> -->
-                        <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
+                        </div>
+                        <!-- <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="videographers">🎥 Videographers:</label>
-                                <input type="number" name="videographers" min="0" value="0" required>
+                                <input type="number" name="videographers" min="0" value="1" required>
                             </div>
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="photographers">📷 Photographers:</label>
-                                <input type="number" name="photographers" min="0" value="0" required>
+                                <input type="number" name="photographers" min="0" value="1" required>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 
@@ -126,7 +134,7 @@
                     <h2>💵 Charges</h2>
                     <div style="display: flex; flex-direction: row; width:80%">
                         <label for="price">Total Cost (excluding GST):</label>
-                        <input style="width:20%; height: 30px;" type="number" id="price" min="0" value="0" required>
+                        <input style="width:20%; height: 30px;" type="number" id="price" min="0" value="1" required>
                     </div>
                     <label for="eventDateTBD"> Add GST ? 
                     <input id="addGST" name="addGST" type="checkbox"></label>
