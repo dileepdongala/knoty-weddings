@@ -15,6 +15,12 @@ let events;
 let totalCost;
 let addGst;
 let validUpTo;
+let pwpsChange;
+let preWeddingPhotoShoot;
+let delChange;
+let deliverables;
+let splitTeam;
+
 // Array of month names
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
@@ -67,7 +73,12 @@ async function fetchQuotation() {
                 totalCost = quotation.price;
                 addGst = quotation.addGst;
                 events = quotation.events;
+                splitTeam = quotation.splitTeam;
                 validUpTo = quotation.validUpTo;
+                pwpsChange = quotation.pwpsChange;
+                preWeddingPhotoShoot = quotation.preWeddingPhotoShoot;
+                delChange = quotation.delChange;
+                deliverables = quotation.deliverables;
                 let quoteHTML = `<div style="flex-direction: column; background-color: #0e323eed;">`
                 quoteHTML += await getGreetingsElement();
                 quoteHTML += await getEventsElemet(events);
@@ -192,20 +203,52 @@ async function getEventsElemet() {
                         style="color: rgb(242, 243, 237); display: flex; gap: 20px; flex-flow: wrap; max-width: 748px; justify-content: flex-start; padding-top: 15px; font-weight: 1000">
                         ${event.name}
                     </div>`;
-        if (event.photographers != '0') {
-            eventsHTML += ` <div
-                        style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
-                        <span>&#128247;</span> 
-                         ${event.photographers} Photographers
-                    </div>`;
-        }
-        if (event.videographers != '0') {
-            eventsHTML += `  <div
-                        style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
-                        <span>&#127909;</span>
-                        ${event.videographers} Videographers
-                    </div>`;
-        }
+                    if(splitTeam) {
+                        if (event.cinematographers && event.cinematographers != '0') {
+                            eventsHTML += ` <div
+                                        style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
+                                        <span>&#127909;</span> 
+                                         ${event.cinematographers} Cinematographers
+                                    </div>`;
+                        }
+                        if (event.candidPhotographers && event.candidPhotographers != '0') {
+                            eventsHTML += ` <div
+                                        style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
+                                        <span>&#128247;</span> 
+                                         ${event.candidPhotographers} Candid Photographers
+                                    </div>`;
+                        }
+                        if (event.traditionalVideographers && event.traditionalVideographers != '0') {
+                            eventsHTML += ` <div
+                                        style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
+                                        <span>&#127909;</span> 
+                                         ${event.traditionalVideographers} Traditional Videographer
+                                    </div>`;
+                        }
+                        if (event.traditionalPhotographers && event.traditionalPhotographers != '0') {
+                            eventsHTML += ` <div
+                                        style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
+                                        <span>&#128247;</span> 
+                                         ${event.traditionalPhotographers} Traditional Photographer
+                                    </div>`;
+                        }
+                    }
+                    else {
+                        if (event.photographers && event.photographers != '0') {
+                            eventsHTML += ` <div
+                                        style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
+                                        <span>&#128247;</span> 
+                                            ${event.photographers} Photographers
+                                    </div>`;
+                        }
+                        if (event.videographers && event.videographers != '0') {
+                            eventsHTML += `  <div
+                            style="text-align: left; color: rgb(242, 243, 237); text-transform: capitalize; font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; padding-top: 10px;">
+                            <span>&#127909;</span>
+                            ${event.videographers} Videographers
+                        </div>`;
+                        }
+                    }
 
         eventsHTML += `     
                 </div>
@@ -243,6 +286,9 @@ async function getComplimentaryElement() {
      });*/
 
     complimentaryData.complimentary.forEach(complimentaryItem => {
+        if(pwpsChange && complimentaryItem.startsWith("Pre-Wedding")){
+            complimentaryItem = preWeddingPhotoShoot;
+        }
         let complimentaryArr = complimentaryItem.split(":::");
         let count = 0;
         complimentaryArr.forEach(item => {
@@ -278,8 +324,15 @@ async function getDeliverablesElement() {
     <div style="display: flex; flex-direction: column; gap: 40px; width: 100%; justify-content: center; align-items: center; z-index: 1;">
     <div style="max-width: 720px; width: 100%; gap: 16px;">`
 
-    const data = await getDocumentData(SEEDED_DATA_COLL, DELIVERABLES_DOC_ID)
-    data.Deliverables.forEach(deliverable => {
+    
+    let deliverablesList;
+    if(delChange){
+        deliverablesList = deliverables;
+    } else {
+        const data = await getDocumentData(SEEDED_DATA_COLL, DELIVERABLES_DOC_ID)
+        deliverablesList = data.Deliverables;
+    }
+    deliverablesList.forEach(deliverable => {
         let deliverablesArr = deliverable.split(":::");
         deliverables_HTML +=
             `<div style="display: flex; width: 100%; background-color: #134251; position: relative; border-radius: 30px; margin-bottom:16px">
@@ -298,7 +351,7 @@ async function getDeliverablesElement() {
                     </a>`
         }
         deliverables_HTML +=
-            `<span style="display: flex; margin-bottom: 5px;">
+            `<span style="display: flex; margin-bottom: 5px; text-align: left">
                         <p>
                             <span style="font-size:20px; color: rgb(242, 243, 237);">
                             <span>&#128262;</span>
@@ -455,14 +508,14 @@ async function getTermsAndConditionsElement() {
 }
 
 // Disable right-click context menu
-// document.addEventListener("contextmenu", (e) => e.preventDefault());
+document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-// // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-// document.addEventListener("keydown", (e) => {
-//   if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'U')) {
-//     e.preventDefault();
-//   }
-// });
+// Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+document.addEventListener("keydown", (e) => {
+  if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'U')) {
+    e.preventDefault();
+  }
+});
 
 // Initialize the database and fetch the quotation
 initDB();
