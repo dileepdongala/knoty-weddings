@@ -9,6 +9,8 @@ const DELIVERABLES_DOC_ID = "Deliverables_Doc";
 const EXTRA_REQUIREMENTS_DOC_ID = "Extra_Requirements_Doc";
 const TERMS_AND_CONDITIONS_DOC_ID = "Terms_And_Conditions_Doc";
 const CHARGES_DOC_ID = "Charges_Doc";
+const WHATSAPP_MESSAGE_ID = "Whatsapp_message";
+const QUOTATION_HOST  = "Quotation_Host";
 let db;
 let documentId;
 let eventsCount = 1;
@@ -16,6 +18,7 @@ let termsAndConditionsCount = 0;
 let deliverablesCount = 0;
 let greetingsCount = 0;
 let documentUrl;
+let hostUrl;
 
 // Initialize fireBase
 function initDB() {
@@ -43,7 +46,13 @@ function initDB() {
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  getQuotationHost();
   fetchQuotations();
+}
+
+async function getQuotationHost() {
+  const data = await getDocumentData(SEEDED_DATA_COLL, QUOTATION_HOST);
+  hostUrl = data.Quotation_host;
 }
 
 // Add a quotation to fireBase
@@ -76,16 +85,17 @@ async function addQuotation(quotation) {
     status: "Draft",
     addGst : quotation.addGst,
     validUpTo : formatedToday.split(" ")[1]+"-"+formatedToday.split(" ")[0]+"-"+formatedToday.split(" ")[2],
+    mobile : quotation.mobile,
+    splitTeam : quotation.splitTeam,
   };
   try {
     const docRef = await addDoc(quotationCollectionRef, quotationData);
-    console.log("Document written with ID:", docRef.id);
     documentId = docRef.id;
     let urlTitle = quotation.title.replace(" & ", "-");
     documentUrl = `quotation.html?id=${urlTitle}:::${documentId}`;
 
     // Open the quotation in a new tab
-    window.open(documentUrl, "_blank")
+    window.open(hostUrl + documentUrl, "_blank");
   } catch (error) {
     alert("Error adding document:", error);
   }
@@ -117,10 +127,14 @@ async function fetchQuotations() {
     querySnapshot.forEach((doc) => {
       const quotation = doc.data();
       const row = document.createElement("tr");
+      let completeUrl = hostUrl + quotation.url
+      documentUrl = quotation.url;
       let quoteHTML = `
           <td>${quotation.title}</td>
           <td>₹ ${quotation.price} /-</td>
-          <td><a href="${quotation.url}" target="_blank">Open</a></td>`
+          <td><a href="${completeUrl}" target="_blank">Open</a></td>
+          <td>+91 - ${quotation.mobile}</td>
+          <td> <i onclick="sendWhatsAppMessage(${quotation.mobile},'${doc.id}')" class="fa fa-whatsapp" style="cursor: pointer;font-size:40px;"></i></td>`
       if (quotation.status == "Expired") {
         quoteHTML += `<td>🔶 Expired</td>
         <td><button value="${doc.id}" id="activateQuotation-${doc.id}">Activate</button></td>`
@@ -138,8 +152,7 @@ async function fetchQuotations() {
         <td><button value="${doc.id}" id="expireQuotation-${doc.id}">Expire</button></td>`
       }
       quoteHTML += ` 
-      <td><button style="background-color:#1475a1"value="${doc.id}" id="sentQuotation-${doc.id}">Sent</button>
-      <td><button style="background-color:#b30000" value="${doc.id}" id="rejectQuotation-${doc.id}">Reject</button>
+      <td><button style="background-color:#b30000" value="${doc.id}" id="rejectQuotation-${doc.id}">Reject</button></td>
       <td><button style="background-color:#00b369" value="${doc.id}" id="acceptQuotation-${doc.id}">Accept</button></td>
       <td><button style="background-color:#db1b1b" value="${doc.id}" id="deleteQuotation-${doc.id}">Delete</button>
       <td>${quotation.created_date}</td>`
@@ -220,12 +233,24 @@ export function toggleInput(checkbox,eventNum) {
       inputField.type = "date";
   }
 };
-window.toggleInput = toggleInput;
 
+window.toggleInput = toggleInput;
+window.sendWhatsAppMessage = sendWhatsAppMessage;
+
+async function sendWhatsAppMessage(number,docId) {
+  const data = await getDocumentData(SEEDED_DATA_COLL, WHATSAPP_MESSAGE_ID)
+  let message = data.Whatsapp_message + "\n " + hostUrl + documentUrl;
+  let whatsappUrl = `https://api.whatsapp.com/send?phone=91${number}&text=${encodeURIComponent(message)}`;
+  
+  window.open(whatsappUrl, "_blank");
+  updateQuotationStatus(docId,"Sent");
+}
 function addEvent() {
+  let lastEventDateId = "eventDateId-" +eventsCount;
   eventsCount += 1;
   const eventSection = document.getElementById('eventSection');
   const newEvent = document.createElement('div');
+  const firstEventDate = document.getElementById(lastEventDateId).value;
   newEvent.classList.add('event');
   newEvent.innerHTML = `<h3>Event ${eventsCount}</h3>
                           <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; ">
@@ -248,7 +273,7 @@ function addEvent() {
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="eventDate">📆 Date:</label>
-                                <input id="eventDateId-${eventsCount}" type="date" name="eventDate" required>
+                                <input id="eventDateId-${eventsCount}" type="date" name="eventDate" value="${firstEventDate}" required>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span> 
@@ -258,36 +283,36 @@ function addEvent() {
                                 </label>
                             </div>
                         </div>
-                         <!-- <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
+                          <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="cinematographers">🎥 Cinematographers:</label>
-                                <input type="number" name="cinematographers" min="0" value="0" required>
+                                <input type="number" name="cinematographers" min="0" value="1" required>
                             </div>
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="candidPhotographers">📷 Candid Photographers:</label>
-                                <input type="number" name="candidPhotographers" min="0" value="0" required>
+                                <input type="number" name="candidPhotographers" min="0" value="1" required>
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
+                             <div style="display: flex; flex-direction: row; width:50%">
+                                <label for="traditionalVideographers">📹 Traditional Videographers:</label>
+                                <input type="number" name="traditionalVideographers" min="0" value="1" required>
+                            </div>
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="traditionalPhotographers">📸 Traditional Photographers:</label>
-                                <input type="number" name="traditionalPhotographers" min="0" value="0" required>
+                                <input type="number" name="traditionalPhotographers" min="0" value="1" required>
                             </div>
-                            <div style="display: flex; flex-direction: row; width:50%">
-                                <label for="traditionalVideographers">📹 Traditional Videographers:</label>
-                                <input type="number" name="traditionalVideographers" min="0" value="0" required>
-                            </div>
-                        </div> -->
-                        <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
+                        </div>
+                        <!-- <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="videographers">🎥 Videographers:</label>
-                                <input type="number" name="videographers" min="0" value="0" required>
+                                <input type="number" name="videographers" min="0" value="1" required>
                             </div>
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="photographers">📷 Photographers:</label>
-                                <input type="number" name="photographers" min="0" value="0" required>
+                                <input type="number" name="photographers" min="0" value="1" required>
                             </div>
-                        </div>`;
+                        </div>-->`;
 
   eventSection.appendChild(newEvent);
 
@@ -313,9 +338,6 @@ document.getElementById('quotationTable').addEventListener('click', (event) => {
   else if (event.target && event.target.id.startsWith('activateQuotation')) {
     updateQuotationStatus(event.target.value,"Draft");
   }
-  else if (event.target && event.target.id.startsWith('sentQuotation')) {
-    updateQuotationStatus(event.target.value,"Sent");
-  }
   else if (event.target && event.target.id.startsWith('rejectQuotation')) {
     updateQuotationStatus(event.target.value,"Rejected");
   }
@@ -333,21 +355,23 @@ document.getElementById("quotationForm").addEventListener("submit", (event) => {
   const title = document.getElementById("title").value;
   const price = document.getElementById("price").value;
   const addGst = document.getElementById("addGST").checked;
+  const mobile = document.getElementById("mobile").value;
+  const splitTeam = true;
   const events = Array.from(document.querySelectorAll('.event')).map(event => ({
     name: event.querySelector('input[name="eventName"]').value,
     location: event.querySelector('input[name="eventLocation"]').value,
     date: event.querySelector('input[name="eventDate"]').value  == 'TBD'?
       `TBD` : 
       `${event.querySelector('input[name="eventDate"]').value.split("-")[2]}-${event.querySelector('input[name="eventDate"]').value.split("-")[1]}-${event.querySelector('input[name="eventDate"]').value.split("-")[0]}` ,
-    /*cinematographers: event.querySelector('input[name="cinematographers"]').value,
+    cinematographers: event.querySelector('input[name="cinematographers"]').value,
     candidPhotographers: event.querySelector('input[name="candidPhotographers"]').value,
     traditionalPhotographers: event.querySelector('input[name="traditionalPhotographers"]').value,
-    traditionalVideographers: event.querySelector('input[name="traditionalVideographers"]').value*/
-    videographers: event.querySelector('input[name="videographers"]').value,
-    photographers: event.querySelector('input[name="photographers"]').value
+    traditionalVideographers: event.querySelector('input[name="traditionalVideographers"]').value,
+    // videographers: event.querySelector('input[name="videographers"]').value,
+    // photographers: event.querySelector('input[name="photographers"]').value
   }));
 
-  const quotation = { title, events, price , addGst};
+  const quotation = { title, events, price , addGst, mobile, splitTeam};
 
   addQuotation(quotation);
 });
