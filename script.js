@@ -118,6 +118,7 @@ async function addQuotation(quotation,deliverablesObj) {
     quotationData.preWeddingPhotoShoot = quotation.preWeddingPhotoShoot;
   }
   if (deliverablesObj.delChange) {
+    quotationData.delChange = deliverablesObj.delChange;
     quotationData.display_del_raw_data = deliverablesObj.disPlayDelRawData;
     quotationData.display_del_long_videos = deliverablesObj.disPlayDelLongVideos;
     quotationData.display_del_photos = deliverablesObj.disPlayDelPhotos;
@@ -487,9 +488,9 @@ document.getElementById("quotationForm").addEventListener("submit", (event) => {
     const disPlayDelAlbums = document.getElementById("display-albums-CheckBoxId").checked;
     const changeDelAlbums = document.getElementById("change-albums-CheckBoxId").checked;
     const updatedDelAlbums = document.getElementById("deliverables-albums-Id").value;
-    const disPlayDelFilms = document.getElementById("display-films-CheckBoxId").checked;
-    const changeDelFilms = document.getElementById("change-films-CheckBoxId").checked;
-    const updatedDelFilms = document.getElementById("deliverables-films-Id").value;
+    const disPlayDelFilms = document.getElementById("display-film-CheckBoxId").checked;
+    const changeDelFilms = document.getElementById("change-film-CheckBoxId").checked;
+    const updatedDelFilms = document.getElementById("deliverables-film-Id").value;
     const disPlayDelReels = document.getElementById("display-reels-CheckBoxId").checked;
     const changeDelReels = document.getElementById("change-reels-CheckBoxId").checked;
     const updatedDelReels = document.getElementById("deliverables-reels-Id").value;
