@@ -33,26 +33,6 @@ function initDB() {
     appId: "1:295918037477:web:eb751a64d1a81094ee670c"
   };
 
-  /*const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.FIREBASE_APP_ID
-  };*/
-
-  /* const firebaseConfig = {
-    apiKey: "AIzaSyDtFmFbzffrijSB6t9G7hYsmmjH1vPR0jU",
-    authDomain: "kwphotography-ea039.firebaseapp.com",
-    databaseURL: "https://kwphotography-ea039-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "kwphotography-ea039",
-    storageBucket: "kwphotography-ea039.firebasestorage.app",
-    messagingSenderId: "643669622642",
-    appId: "1:643669622642:web:af4d25f389a501629fa7eb",
-    measurementId: "G-3MFN4VCXMM"
-  };*/
-
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
@@ -66,7 +46,7 @@ async function getQuotationHost() {
 }
 
 // Add a quotation to fireBase
-async function addQuotation(quotation,deliverablesObj) {
+async function addQuotation(quotation, deliverablesObj) {
 
   // Add data
   const now = new Date();
@@ -97,12 +77,20 @@ async function addQuotation(quotation,deliverablesObj) {
     validUpTo: formatedToday.split(" ")[1] + "-" + formatedToday.split(" ")[0] + "-" + formatedToday.split(" ")[2],
     mobile: quotation.mobile,
     splitTeam: quotation.splitTeam,
+    Albums_Addon: quotation.Albums_Addon,
     HD_Changed: quotation.HD_Changed,
     LED_Changed: quotation.LED_Changed,
     WebLive_Changed: quotation.WebLive_Changed,
-    pwpsChange: quotation.pwpsChange,
+    pwpsRequired: quotation.pwpsRequired,
     droneRequired: quotation.droneRequired,
   };
+  if (quotation.Albums_Addon) {
+    quotationData.Albums_Addon_Changed = quotation.Albums_Addon_Changed;
+    if (quotation.Albums_Addon_Changed) {
+      quotationData.Albums_Addon_Price = quotation.Albums_Addon_Price;
+      quotationData.Albums_Addon_Photos = quotation.Albums_Addon_Photos;
+    }
+  }
   if (quotation.HD_Changed) {
     quotationData.HD_Count = quotation.HD_Count;
     quotationData.HD_Size = quotation.HD_Size;
@@ -114,34 +102,38 @@ async function addQuotation(quotation,deliverablesObj) {
     quotationData.WebLive_Price = quotation.WebLive_Price;
     quotationData.WebLive_Time = quotation.WebLive_Time;
   }
-  if (quotation.pwpsChange) {
-    quotationData.preWeddingPhotoShoot = quotation.preWeddingPhotoShoot;
+  if (quotation.pwpsRequired) {
+    quotationData.pwpsChange = quotation.pwpsChange;
+    if (quotation.pwpsChange) {
+      quotationData.preWeddingPhotoShoot = quotation.preWeddingPhotoShoot;
+    }
   }
   if (deliverablesObj.delChange) {
     quotationData.delChange = deliverablesObj.delChange;
     quotationData.display_del_raw_data = deliverablesObj.disPlayDelRawData;
     quotationData.display_del_long_videos = deliverablesObj.disPlayDelLongVideos;
     quotationData.display_del_photos = deliverablesObj.disPlayDelPhotos;
+    if (!quotation.Albums_Addon)
     quotationData.display_del_albums = deliverablesObj.disPlayDelAlbums;
     quotationData.display_del_films = deliverablesObj.disPlayDelFilms;
     quotationData.display_del_reels = deliverablesObj.disPlayDelReels;
 
-    if(deliverablesObj.disPlayDelRawData && deliverablesObj.changeDelRawData){
+    if (deliverablesObj.disPlayDelRawData && deliverablesObj.changeDelRawData) {
       quotationData.del_raw_data = deliverablesObj.updatedDelRawData;
     }
-    if(deliverablesObj.disPlayDelLongVideos && deliverablesObj.changeDelLongVideos){
+    if (deliverablesObj.disPlayDelLongVideos && deliverablesObj.changeDelLongVideos) {
       quotationData.del_long_videos = deliverablesObj.updatedDelLongVideos;
     }
-    if(deliverablesObj.disPlayDelPhotos && deliverablesObj.changeDelPhotos){
+    if (deliverablesObj.disPlayDelPhotos && deliverablesObj.changeDelPhotos) {
       quotationData.del_photos = deliverablesObj.updatedDelPhotos;
     }
-    if(deliverablesObj.disPlayDelAlbums && deliverablesObj.changeDelAlbums){
+    if (!quotation.Albums_Addon && deliverablesObj.disPlayDelAlbums && deliverablesObj.changeDelAlbums) {
       quotationData.del_albums = deliverablesObj.updatedDelAlbums;
     }
-    if(deliverablesObj.disPlayDelFilms && deliverablesObj.changeDelFilms){
+    if (deliverablesObj.disPlayDelFilms && deliverablesObj.changeDelFilms) {
       quotationData.del_films = deliverablesObj.updatedDelFilms;
     }
-    if(deliverablesObj.disPlayDelReels && deliverablesObj.changeDelReels){
+    if (deliverablesObj.disPlayDelReels && deliverablesObj.changeDelReels) {
       quotationData.del_reels = deliverablesObj.updatedDelReels;
     }
   }
@@ -212,7 +204,7 @@ async function fetchQuotations() {
           <td>${quotation.title}</td>
           <td>₹ ${quotation.price} /-</td>
           <td><a href="${completeUrl}" target="_blank">Open</a></td>
-          <td>+91 - ${quotation.mobile}</td>
+          <td>+ ${quotation.mobile}</td>
           <td> <i onclick="sendWhatsAppMessage(${quotation.mobile},'${doc.id}')" class="fa fa-whatsapp" style="cursor: pointer;font-size:40px;"></i></td>`
       if (quotation.status == "Expired") {
         quoteHTML += `<td>🔶 Expired</td>
@@ -230,7 +222,7 @@ async function fetchQuotations() {
         quoteHTML += `<td >🧼 Draft </td>
         <td><button value="${doc.id}" id="expireQuotation-${doc.id}">Expire</button></td>`
       }
-      quoteHTML += ` 
+      quoteHTML += ` <td>${quotation.validUpTo}</td>
       <td><button style="background-color:#b30000" value="${doc.id}" id="rejectQuotation-${doc.id}">Reject</button></td>
       <td><button style="background-color:#00b369" value="${doc.id}" id="acceptQuotation-${doc.id}">Accept</button></td>
       <td><button style="background-color:#db1b1b" value="${doc.id}" id="deleteQuotation-${doc.id}">Delete</button>
@@ -319,9 +311,18 @@ window.sendWhatsAppMessage = sendWhatsAppMessage;
 window.removeEvent = removeEvent;
 
 async function sendWhatsAppMessage(number, docId) {
+  const docRef = doc(db, QUOTATION_COLL, docId);
+
+  const updatedData = {
+    ['status']: 'Sent', // Dynamically set the field to update
+  };
+  await updateDoc(docRef, updatedData);
+  alert("Proposal sent successfully! ");
+  fetchQuotations();
+  document.getElementById("quotationTable").classList.toggle("hidden");
   const data = await getDocumentData(SEEDED_DATA_COLL, WHATSAPP_MESSAGE_ID)
   let message = data.Whatsapp_message + "\n " + hostUrl + documentUrl;
-  let whatsappUrl = `https://api.whatsapp.com/send?phone=91${number}&text=${encodeURIComponent(message)}`;
+  let whatsappUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(message)}`;
 
   window.open(whatsappUrl, "_blank");
   updateQuotationStatus(docId, "Sent");
@@ -449,6 +450,10 @@ document.getElementById("quotationForm").addEventListener("submit", (event) => {
   const price = document.getElementById("price").value;
   const addGst = document.getElementById("addGST").checked;
   const mobile = document.getElementById("mobile").value;
+  const Albums_Addon = document.getElementById("albumsAddOnCheckBoxId").checked;
+  const Albums_Addon_Changed = document.getElementById("albumsAddOnChangeCheckBoxId").checked;
+  const Albums_Addon_Price = document.getElementById("albumsAddOnCostId").value;
+  const Albums_Addon_Photos = document.getElementById("albumsAddOnPhotosId").value;
   const HD_Changed = document.getElementById("hardDrivesCheckBoxId").checked;
   const HD_Count = document.getElementById("hardDrivesCountId").value;
   const HD_Size = document.getElementById("hardDrivesSizeId").value;
@@ -457,6 +462,7 @@ document.getElementById("quotationForm").addEventListener("submit", (event) => {
   const WebLive_Changed = document.getElementById("webLiveCheckBoxId").checked;
   const WebLive_Price = document.getElementById("webLiveId").value;
   const WebLive_Time = document.getElementById("webLiveTimeId").value;
+  const pwpsRequired = document.getElementById("preWeddingPSReqCheckBoxId").checked;
   const pwpsChange = document.getElementById("preWeddingShootCheckBoxId").checked;
   const preWeddingPhotoShoot = document.getElementById("preWeddingShootId").value;
   const droneRequired = document.getElementById("dronesCheckBoxId").checked;
@@ -478,8 +484,8 @@ document.getElementById("quotationForm").addEventListener("submit", (event) => {
   }));
 
   const quotation =
-    { title, events, price, addGst, mobile, splitTeam, HD_Changed, HD_Count, HD_Size, LED_Changed, LED_Price, WebLive_Changed, WebLive_Price, WebLive_Time, pwpsChange, preWeddingPhotoShoot, droneRequired };
-  let deliverablesObj = {delChange};
+    { title, events, price, addGst, mobile, splitTeam, Albums_Addon, Albums_Addon_Changed, Albums_Addon_Price, Albums_Addon_Photos, HD_Changed, HD_Count, HD_Size, LED_Changed, LED_Price, WebLive_Changed, WebLive_Price, WebLive_Time, pwpsRequired, pwpsChange, preWeddingPhotoShoot, droneRequired };
+  let deliverablesObj = { delChange };
 
   if (delChange) {
     const disPlayDelPhotos = document.getElementById("display-photos-CheckBoxId").checked;
@@ -500,10 +506,10 @@ document.getElementById("quotationForm").addEventListener("submit", (event) => {
     const disPlayDelRawData = document.getElementById("display-rawData-CheckBoxId").checked;
     const changeDelRawData = document.getElementById("change-rawData-CheckBoxId").checked;
     const updatedDelRawData = document.getElementById("deliverables-rawData-Id").value;
-    deliverablesObj = {delChange,disPlayDelRawData,changeDelRawData,updatedDelRawData,disPlayDelLongVideos,changeDelLongVideos,updatedDelLongVideos,disPlayDelPhotos,changeDelPhotos,updatedDelPhotos,disPlayDelAlbums,changeDelAlbums,updatedDelAlbums,disPlayDelFilms,changeDelFilms,updatedDelFilms,disPlayDelReels,changeDelReels,updatedDelReels}
+    deliverablesObj = { delChange, disPlayDelRawData, changeDelRawData, updatedDelRawData, disPlayDelLongVideos, changeDelLongVideos, updatedDelLongVideos, disPlayDelPhotos, changeDelPhotos, updatedDelPhotos, disPlayDelAlbums, changeDelAlbums, updatedDelAlbums, disPlayDelFilms, changeDelFilms, updatedDelFilms, disPlayDelReels, changeDelReels, updatedDelReels }
   }
 
-  addQuotation(quotation,deliverablesObj);
+  addQuotation(quotation, deliverablesObj);
 });
 
 async function getDocumentData(collection_name, document_id) {
@@ -643,6 +649,11 @@ document.getElementById('change-deliverables-CheckBoxId').addEventListener('clic
   document.getElementById("changeDeliverables").classList.toggle("hidden");
 });
 
+document.getElementById('albumsAddOnCheckBoxId').addEventListener('click', (event) => {
+  document.getElementById("changeAlbumAddOnSec").classList.toggle("hidden");
+  document.getElementById("changeAlbumDelSec").classList.toggle("hidden");
+});
+
 document.getElementById('editGreetings').addEventListener('click', (event) => {
   displayGreetings();
 });
@@ -712,14 +723,14 @@ function disableEnableElement(idArr) {
 }
 
 // Disable right-click context menu
-/*document.addEventListener("contextmenu", (e) => e.preventDefault());
+document.addEventListener("contextmenu", (e) => e.preventDefault());
 
 // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
 document.addEventListener("keydown", (e) => {
   if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'U')) {
     e.preventDefault();
   }
-});*/
+});
 
 
 // Initialize the database
