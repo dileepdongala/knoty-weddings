@@ -166,8 +166,8 @@ function sortTableByDate() {
   let rows = Array.from(table.rows).slice(1); // Get all rows except header
 
   rows.sort((rowA, rowB) => {
-    let dateA = rowA.cells[10].textContent.trim();
-    let dateB = rowB.cells[10].textContent.trim();
+    let dateA = rowA.cells[11].textContent.trim();
+    let dateB = rowB.cells[11].textContent.trim();
 
     // Convert "dd-mm-yyyy hh:mm" to "yyyy-mm-dd hh:mm" for comparison
     let timestampA = new Date(dateA.split(" ")[0].split("-").reverse().join("-") + "T" + dateA.split(" ")[1]);
