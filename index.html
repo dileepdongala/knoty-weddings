@@ -37,6 +37,7 @@
                     <th>Share</th>
                     <th>Status</th>
                     <th>Action</th>
+                    <th>Validity Date</th>
                     <th>Reject</th>
                     <th>Accept</th>
                     <th>Delete</th>
@@ -51,14 +52,14 @@
                 <section>
                     <h2>Client Details</h2>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px;  gap:20px">
-                    <div style="display: flex; flex-direction: row;">
-                        <label for="title">Title : </label>
-                        <input type="text" id="title" required/>
-                    </div>
-                    <div style="display: flex; flex-direction: row; ">
-                        <label for="mobile">Mobile : </label>+91<span>&nbsp;</span>
-                        <input type="text" id="mobile" required/>
-                    </div>
+                        <div style="display: flex; flex-direction: row;">
+                            <label for="title">Title : </label>
+                            <input type="text" id="title" required />
+                        </div>
+                        <div style="display: flex; flex-direction: row; ">
+                            <label for="mobile">Mobile : </label>+<span>&nbsp;</span>
+                            <input type="text" id="mobile" required />
+                        </div>
                     </div>
                 </section>
 
@@ -69,28 +70,30 @@
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px ">
                             <div style="display: flex; flex-direction: row;">
                                 <label for="eventName">Event Name : </label>
-                                <input type="text" name="eventName" required/>
+                                <input type="text" name="eventName" required />
                             </div>
                             <div style="display: flex; flex-direction: row; ">
                                 <label for="eventLocation">📍 Location : </label>
                                 <input type="text" id="eventLocationId-1" name="eventLocation" required>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <span>&nbsp;</span> 
+                                <span>&nbsp;</span>
                                 <br><br>
-                                <label for="eventLocationTBD"> 
-                                    <input id="eventLocationTBD-1" name="eventLocationTBD" type="checkbox"  onclick="toggleInput(this,1)">TBD</input>
+                                <label for="eventLocationTBD">
+                                    <input id="eventLocationTBD-1" name="eventLocationTBD" type="checkbox"
+                                        onclick="toggleInput(this,1)">TBD</input>
                                 </label>
                             </div>
                             <div style="display: flex; flex-direction: row; ">
                                 <label for="eventDate">📆 Date : </label>
-                                <input id="eventDateId-1" type="date" name="eventDate" required/>
+                                <input id="eventDateId-1" type="date" name="eventDate" required />
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <span>&nbsp;</span> 
+                                <span>&nbsp;</span>
                                 <br><br>
-                                <label for="eventDateTBD"> 
-                                    <input id="eventDateTBD-1" name="eventDateTBD" type="checkbox" value="off" onclick="toggleInput(this,1)">TBD</input>
+                                <label for="eventDateTBD">
+                                    <input id="eventDateTBD-1" name="eventDateTBD" type="checkbox" value="off"
+                                        onclick="toggleInput(this,1)">TBD</input>
                                 </label>
                             </div>
                             <div style="display: flex; flex-direction: row;">
@@ -101,21 +104,21 @@
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px;  gap:20px">
                             <div style="display: flex; flex-direction: row;">
                                 <label for="cinematographers">🎥 Cinematographers : </label>
-                                <input type="number" name="cinematographers" min="0" value="1" required/>
+                                <input type="number" name="cinematographers" min="0" value="1" required />
                             </div>
                             <div style="display: flex; flex-direction: row;">
                                 <label for="candidPhotographers">📷 Candid Photographers : </label>
-                                <input type="number" name="candidPhotographers" min="0" value="1" required/>
+                                <input type="number" name="candidPhotographers" min="0" value="1" required />
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; gap:20px">
-                             <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: row;">
                                 <label for="traditionalVideographers">📹 Traditional Videographers : </label>
-                                <input type="number" name="traditionalVideographers" min="0" value="1" required/>
+                                <input type="number" name="traditionalVideographers" min="0" value="1" required />
                             </div>
                             <div style="display: flex; flex-direction: row;">
                                 <label for="traditionalPhotographers">📸 Traditional Photographers : </label>
-                                <input type="number" name="traditionalPhotographers" min="0" value="1" required/>
+                                <input type="number" name="traditionalPhotographers" min="0" value="1" required />
                             </div>
                         </div>
                         <!-- <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
@@ -132,72 +135,112 @@
                 </div>
                 <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
                     <button type="button" id="addEvent">+ Add Another Event</button>
-                    <i class="fa fa-trash-o" title="Remove Latest Event" style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeEvent()"></i>
+                    <i class="fa fa-trash-o" title="Remove Latest Event"
+                        style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeEvent()"></i>
                 </div>
                 <section>
                     <h2>💵 Charges</h2>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
                         <label for="price">Total Cost (excluding GST) : </label>
-                        <input style="width:20%; height: 30px;" type="number" id="price" min="0" value="400000" required/>
-                        <label >   Add GST ?  </label>
-                    <label class="switch">
-                        <input type="checkbox" id="addGST" name="addGST" checked/> 
-                        <span class="slider round"></span>
-                    </label>
+                        <input style="width:20%; height: 30px;" type="number" id="price" min="0" value="400000"
+                            required />
+                        <label> Add GST ? </label>
+                        <label class="switch">
+                            <input type="checkbox" id="addGST" name="addGST" checked />
+                            <span class="slider round"></span>
+                        </label>
                     </div>
                 </section>
                 <section>
                     <h2>Other Details</h2>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label >  Do you want to change Hard drives count ? </label>
+                        <label> Include Albums as Add-on service ? </label>
                         <label class="switch">
-                            <input type="checkbox" id="hardDrivesCheckBoxId" name="hardDrivesCheckBox" 
-                            onclick="disableEnableElement(['hardDrivesCountId','hardDrivesSizeId'])"/> 
+                            <input type="checkbox" id="albumsAddOnCheckBoxId" name="albumsAddOnCheckBox" />
                             <span class="slider round"></span>
                         </label>
-                        <input style="width:30px" type="number" title="HD Count" id="hardDrivesCountId" name="hardDrivesCount" value="2" disabled required/>
+                    </div>
+                    <div id="changeAlbumAddOnSec" class="hidden">
+                        <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                            <label> Do you want to change Albums Section in Add-on Services ? </label>
+                            <label class="switch">
+                                <input type="checkbox" id="albumsAddOnChangeCheckBoxId" name="albumsAddOnChangeCheckBox"
+                                    onclick="disableEnableElement(['albumsAddOnCostId','albumsAddOnPhotosId'])" />
+                                <span class="slider round"></span>
+                            </label>
+                            <label for="webLiveCharges">💲 Charges : ₹ </label>
+                            <input type="text" title="Charges" id="albumsAddOnCostId" name="albumsAddOnCost"
+                                value="20,000" disabled required />
+                            <label>per Album </label>
+                            <input type="number" title="Web Live Time" id="albumsAddOnPhotosId" name="albumsAddOnPhotos"
+                                value="150" disabled required />
+                            <label> Images </label>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                        <label> Do you want to change Hard drives count ? </label>
+                        <label class="switch">
+                            <input type="checkbox" id="hardDrivesCheckBoxId" name="hardDrivesCheckBox"
+                                onclick="disableEnableElement(['hardDrivesCountId','hardDrivesSizeId'])" />
+                            <span class="slider round"></span>
+                        </label>
+                        <input style="width:30px" type="number" title="HD Count" id="hardDrivesCountId"
+                            name="hardDrivesCount" value="2" disabled required />
                         <label for="hardDrivesCount">units of</label>
-                        <input style="width:30px" type="number" title="HD Size" id="hardDrivesSizeId" name="hardDrivesSize" value="6" disabled required/>
+                        <input style="width:30px" type="number" title="HD Size" id="hardDrivesSizeId"
+                            name="hardDrivesSize" value="6" disabled required />
                         <label for="hardDrivesSize">TB external hard drives.</label>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label >  Do you want to change LED screens section ? </label>
+                        <label> Do you want to change LED screens section ? </label>
                         <label class="switch">
-                            <input type="checkbox" id="ledScreensCheckBoxId" name="ledScreensCheckBox" 
-                            onclick="disableEnableElement(['ledScreensId'])"/> 
+                            <input type="checkbox" id="ledScreensCheckBoxId" name="ledScreensCheckBox"
+                                onclick="disableEnableElement(['ledScreensId'])" />
                             <span class="slider round"></span>
                         </label>
                         <label for="ledScreensCharges">💲 Charges : ₹ </label>
-                        <input type="text" title="Charges" id="ledScreensId" name="ledScreensCharges" value="20,000" disabled required/>
+                        <input type="text" title="Charges" id="ledScreensId" name="ledScreensCharges" value="20,000"
+                            disabled required />
                         <label>per LED Screen</label>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label >  Do you want to change Web Live Section ? </label>
+                        <label> Do you want to change Web Live Section ? </label>
                         <label class="switch">
-                            <input type="checkbox" id="webLiveCheckBoxId" name="webLiveCheckBox" 
-                            onclick="disableEnableElement(['webLiveId','webLiveTimeId'])"/> 
+                            <input type="checkbox" id="webLiveCheckBoxId" name="webLiveCheckBox"
+                                onclick="disableEnableElement(['webLiveId','webLiveTimeId'])" />
                             <span class="slider round"></span>
                         </label>
                         <label for="webLiveCharges">💲 Charges : ₹ </label>
-                        <input type="text" title="Charges" id="webLiveId" name="webLiveCharges" value="15,000" disabled required/>
+                        <input type="text" title="Charges" id="webLiveId" name="webLiveCharges" value="15,000" disabled
+                            required />
                         <label>per session </label>
-                        <input type="number" title="Web Live Time" id="webLiveTimeId" name="webLiveTime" value="5" disabled required/>
+                        <input type="number" title="Web Live Time" id="webLiveTimeId" name="webLiveTime" value="5"
+                            disabled required />
                         <label> hours </label>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label >  Do you want to change Pre-Wedding Photo shoot Section ? </label>
+                        <label> Include Pre-Wedding Photo shoot as Complimentary? </label>
                         <label class="switch">
-                            <input type="checkbox" id="preWeddingShootCheckBoxId" name="preWeddingShootCheckBox" 
-                            onclick="disableEnableElement(['preWeddingShootId'])"/> 
+                            <input type="checkbox" id="preWeddingPSReqCheckBoxId" name="preWeddingPSReqCheckBox"
+                                checked />
                             <span class="slider round"></span>
                         </label>
-                        <textarea rows="2" cols="50" title="Pre Wedding Shoot" id="preWeddingShootId" disabled 
-                        required>You will receive a collection of 50 beautifully edited & retouched images in cloud gallery</textarea>
+                    </div>
+                    <div id="changePWPSSection"
+                        style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                        <label> Do you want to change Pre-Wedding Photo shoot Section ? </label>
+                        <label class="switch">
+                            <input type="checkbox" id="preWeddingShootCheckBoxId" name="preWeddingShootCheckBox"
+                                onclick="disableEnableElement(['preWeddingShootId'])" />
+                            <span class="slider round"></span>
+                        </label>
+                        <textarea rows="2" cols="50" title="Pre Wedding Shoot" id="preWeddingShootId" disabled
+                            required>You will receive a collection of 50 beautifully edited & retouched images in cloud gallery</textarea>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label >  Is Drone included ? </label>
+                        <label> Include Drone as Complimentary ? </label>
                         <label class="switch">
-                            <input type="checkbox" id="dronesCheckBoxId" name="dronesCheckBox" checked /> 
+                            <input type="checkbox" id="dronesCheckBoxId" name="dronesCheckBox" checked />
                             <span class="slider round"></span>
                         </label>
                         <label>*Drone is complimentary for wedding*</label>
@@ -208,109 +251,124 @@
                     <h2>Deliverables</h2>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
                         <label>Change Default Deliverables ?</label>
-                    <label class="switch">
-                        <input title="Change Default Deliverables ?" type="checkbox" id="change-deliverables-CheckBoxId" name="change-deliverables-CheckBox" /> 
-                        <span class="slider round"></span>
-                    </label>
-                </div>
+                        <label class="switch">
+                            <input title="Change Default Deliverables ?" type="checkbox"
+                                id="change-deliverables-CheckBoxId" name="change-deliverables-CheckBox" />
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
                     <div id="changeDeliverables" class="hidden">
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label class="switch">
-                            <input title="Add Photos ?" type="checkbox" id="display-photos-CheckBoxId" name="display-photos-CheckBox" checked
-                            onclick="disableEnableElement(['change-photos-CheckBoxId'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                        <label> Photos </label>
-                        <textarea rows="2" cols="50" title="Photos" id="deliverables-photos-Id" disabled 
-                        required>1000 Handpicked & Edited images in Cloud (delivered in 20 days ) </textarea>
-                        <label> Change Photos ? </label>
-                        <label class="switch">
-                            <input title="Change Photos" type="checkbox" id="change-photos-CheckBoxId" name="change-photos-CheckBox" 
-                            onclick="disableEnableElement(['deliverables-photos-Id'])"/> 
-                            <span class="slider round"></span>
-                        </label>
+                        <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                            <label class="switch">
+                                <input title="Add Photos ?" type="checkbox" id="display-photos-CheckBoxId"
+                                    name="display-photos-CheckBox" checked
+                                    onclick="disableEnableElement(['change-photos-CheckBoxId'])" />
+                                <span class="slider round"></span>
+                            </label>
+                            <label> Photos </label>
+                            <textarea rows="2" cols="50" title="Photos" id="deliverables-photos-Id" disabled
+                                required>1000 Handpicked & Edited images in Cloud (delivered in 20 days ) </textarea>
+                            <label> Change Photos ? </label>
+                            <label class="switch">
+                                <input title="Change Photos" type="checkbox" id="change-photos-CheckBoxId"
+                                    name="change-photos-CheckBox"
+                                    onclick="disableEnableElement(['deliverables-photos-Id'])" />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div id="changeAlbumDelSec">
+                            <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                                <label class="switch">
+                                    <input title="Add Albums ?" type="checkbox" id="display-albums-CheckBoxId"
+                                        name="display-albums-CheckBox" checked
+                                        onclick="disableEnableElement(['change-albums-CheckBoxId'])" />
+                                    <span class="slider round"></span>
+                                </label>
+                                <label> Albums </label>
+                                <textarea rows="2" cols="50" title="albums" id="deliverables-albums-Id" disabled
+                                    required>Two premium Designer Albums 150-200 images in each album (40 sheets per album)  </textarea>
+                                <label> Change Albums ? </label>
+                                <label class="switch">
+                                    <input title="Change albums" type="checkbox" id="change-albums-CheckBoxId"
+                                        name="change-albums-CheckBox"
+                                        onclick="disableEnableElement(['deliverables-albums-Id'])" />
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                            <label class="switch">
+                                <input title="Add Film ?" type="checkbox" id="display-film-CheckBoxId"
+                                    name="display-film-CheckBox" checked
+                                    onclick="disableEnableElement(['change-film-CheckBoxId'])" />
+                                <span class="slider round"></span>
+                            </label>
+                            <label> Film </label>
+                            <textarea rows="2" cols="50" title="film" id="deliverables-film-Id" disabled
+                                required>A cinematic Film of 4-8 mins with best footages from all the events in cloud (delivered in 60 days )  </textarea>
+                            <label> Change Film ? </label>
+                            <label class="switch">
+                                <input title="Change film" type="checkbox" id="change-film-CheckBoxId"
+                                    name="change-film-CheckBox"
+                                    onclick="disableEnableElement(['deliverables-film-Id'])" />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                            <label class="switch">
+                                <input title="Add Long Videos ?" type="checkbox" id="display-longVideos-CheckBoxId"
+                                    name="display-longVideos-CheckBox" checked
+                                    onclick="disableEnableElement(['change-longVideos-CheckBoxId'])" />
+                                <span class="slider round"></span>
+                            </label>
+                            <label> Long Videos </label>
+                            <textarea rows="2" cols="50" title="Long Videos" id="deliverables-longVideos-Id" disabled
+                                required>Full Length Documented long videos for all the events in hard drives (delivered in 60 days )  </textarea>
+                            <label> Change Long Videos ? </label>
+                            <label class="switch">
+                                <input title="Change Long Videos" type="checkbox" id="change-longVideos-CheckBoxId"
+                                    name="change-longVideos-CheckBox"
+                                    onclick="disableEnableElement(['deliverables-longVideos-Id'])" />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                            <label class="switch">
+                                <input title="Add Raw Data ?" type="checkbox" id="display-rawData-CheckBoxId"
+                                    name="display-rawData-CheckBox" checked
+                                    onclick="disableEnableElement(['change-rawData-CheckBoxId'])" />
+                                <span class="slider round"></span>
+                            </label>
+                            <label> Raw Data </label>
+                            <textarea rows="2" cols="50" title="Raw Data" id="deliverables-rawData-Id" disabled
+                                required>All Raw data, Edited photos & videos in Hard drives </textarea>
+                            <label> Change Raw Data ? </label>
+                            <label class="switch">
+                                <input title="Change Raw Data" type="checkbox" id="change-rawData-CheckBoxId"
+                                    name="change-rawData-CheckBox"
+                                    onclick="disableEnableElement(['deliverables-rawData-Id'])" />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                            <label class="switch">
+                                <input title="Add Reels ?" type="checkbox" id="display-reels-CheckBoxId"
+                                    name="display-reels-CheckBox"
+                                    onclick="disableEnableElement(['change-reels-CheckBoxId'])" />
+                                <span class="slider round"></span>
+                            </label>
+                            <label> Reels </label>
+                            <textarea rows="2" cols="50" title="Reels" id="deliverables-reels-Id" disabled
+                                required>Reels from 2  different events , duration of each reel is 30 sec to 1 min - delivered in 60 days. </textarea>
+                            <label> Change Reels ? </label>
+                            <label class="switch">
+                                <input title="Change Reels" type="checkbox" id="change-reels-CheckBoxId"
+                                    name="change-reels-CheckBox" disabled
+                                    onclick="disableEnableElement(['deliverables-reels-Id'])" />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
                     </div>
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label class="switch">
-                            <input title="Add Albums ?" type="checkbox" id="display-albums-CheckBoxId" name="display-albums-CheckBox" checked
-                            onclick="disableEnableElement(['change-albums-CheckBoxId'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                        <label> Albums </label>
-                        <textarea rows="2" cols="50" title="albums" id="deliverables-albums-Id" disabled 
-                        required>Two premium Designer Albums 150-200 images in each album (40 sheets per album)  </textarea>
-                        <label> Change Albums ? </label>
-                        <label class="switch">
-                            <input title="Change albums" type="checkbox" id="change-albums-CheckBoxId" name="change-albums-CheckBox" 
-                            onclick="disableEnableElement(['deliverables-albums-Id'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label class="switch">
-                            <input title="Add Film ?" type="checkbox" id="display-film-CheckBoxId" name="display-film-CheckBox" checked
-                            onclick="disableEnableElement(['change-film-CheckBoxId'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                        <label> Film </label>
-                        <textarea rows="2" cols="50" title="film" id="deliverables-film-Id" disabled 
-                        required>A cinematic Film of 4-8 mins with best footages from all the events in cloud (delivered in 60 days )  </textarea>
-                        <label> Change Film ? </label>
-                        <label class="switch">
-                            <input title="Change film" type="checkbox" id="change-film-CheckBoxId" name="change-film-CheckBox" 
-                            onclick="disableEnableElement(['deliverables-film-Id'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label class="switch">
-                            <input title="Add Long Videos ?" type="checkbox" id="display-longVideos-CheckBoxId" name="display-longVideos-CheckBox" checked
-                            onclick="disableEnableElement(['change-longVideos-CheckBoxId'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                        <label> Long Videos </label>
-                        <textarea rows="2" cols="50" title="Long Videos" id="deliverables-longVideos-Id" disabled 
-                        required>Full Length Documented long videos for all the events in hard drives (delivered in 60 days )  </textarea>
-                        <label> Change Long Videos ? </label>
-                        <label class="switch">
-                            <input title="Change Long Videos" type="checkbox" id="change-longVideos-CheckBoxId" name="change-longVideos-CheckBox" 
-                            onclick="disableEnableElement(['deliverables-longVideos-Id'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label class="switch">
-                            <input title="Add Raw Data ?" type="checkbox" id="display-rawData-CheckBoxId" name="display-rawData-CheckBox" checked
-                            onclick="disableEnableElement(['change-rawData-CheckBoxId'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                        <label> Raw Data </label>
-                        <textarea rows="2" cols="50" title="Raw Data" id="deliverables-rawData-Id" disabled 
-                        required>All Raw data, Edited photos & videos in Hard drives </textarea>
-                        <label> Change Raw Data ? </label>
-                        <label class="switch">
-                            <input title="Change Raw Data" type="checkbox" id="change-rawData-CheckBoxId" name="change-rawData-CheckBox" 
-                            onclick="disableEnableElement(['deliverables-rawData-Id'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label class="switch">
-                            <input title="Add Reels ?" type="checkbox" id="display-reels-CheckBoxId" name="display-reels-CheckBox" 
-                            onclick="disableEnableElement(['change-reels-CheckBoxId'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                        <label> Reels </label>
-                        <textarea rows="2" cols="50" title="Reels" id="deliverables-reels-Id" disabled 
-                        required>Reels from 2  different events , duration of each reel is 30 sec to 1 min - delivered in 60 days. </textarea>
-                        <label> Change Reels ? </label>
-                        <label class="switch">
-                            <input title="Change Reels" type="checkbox" id="change-reels-CheckBoxId" name="change-reels-CheckBox" 
-                            disabled onclick="disableEnableElement(['deliverables-reels-Id'])"/> 
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </div>
                 </section>
 
                 <button type="submit">Create</button>
@@ -336,7 +394,7 @@
                     field. Seperate Heading (first) and detail (second) with ::: </label>
                 <div style="display: flex; flex-direction: row; ">
                     <button id="addNewDeliverablesBtn" style="width:10%" type="button">+ Add New Deliverables</button>
-                    <button  type="submit">Save changes</button>
+                    <button type="submit">Save changes</button>
                 </div>
             </form>
         </div>
