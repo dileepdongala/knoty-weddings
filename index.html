@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Knoty Weddings</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.jpeg" type="image/x-icon">
+    <link rel="apple-touch-icon" href="favicon.jpeg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 </head>
@@ -42,12 +44,13 @@
                     <th>Accept</th>
                     <th>Delete</th>
                     <th>Creation Date</th>
+                    <th>Edit</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
         <div id="formContainer" class="hidden">
-            <h3>New Proposal</h3>
+            <h3 id="formTitle">New Proposal</h3>
             <form id="quotationForm">
                 <section>
                     <h2>Client Details</h2>
@@ -60,68 +63,79 @@
                             <label for="mobile">Mobile : </label>+<span>&nbsp;</span>
                             <input type="text" id="mobile" required />
                         </div>
+                        <div style="display: flex; flex-direction: row; ">
+                            <input type="text" id="editDocumentId" hidden />
+                        </div>
+                        <div id="validityId" style="display: flex; flex-direction: row; ">
+                            <label for="mobile">Valid Up to (Edit purpose) : </label>
+                            <input type="text" id="editValidUpToId" disabled />
+                        </div>
                     </div>
                 </section>
-
-                <h2>📋 Event Details</h2>
-                <div id="eventSection">
-                    <div id="Event-1" class="event">
-                        <h3>Event 1</h3>
-                        <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px ">
-                            <div style="display: flex; flex-direction: row;">
-                                <label for="eventName">Event Name : </label>
-                                <input type="text" name="eventName" required />
+                <section>
+                    <h2>📋 Event Details</h2>
+                    <div id="eventSection">
+                        <div id="Event-1" class="event">
+                            <h3>Event 1</h3>
+                            <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px ">
+                                <div style="display: flex; flex-direction: row;">
+                                    <label for="eventName">Event Name : </label>
+                                    <input type="text" id="eventNameId-1" name="eventName" required />
+                                </div>
+                                <div style="display: flex; flex-direction: row; ">
+                                    <label for="eventLocation">📍 Location : </label>
+                                    <input type="text" id="eventLocationId-1" name="eventLocation" required>
+                                    <span>&nbsp;</span>
+                                    <span>&nbsp;</span>
+                                    <span>&nbsp;</span>
+                                    <br><br>
+                                    <label for="eventLocationTBD">
+                                        <input id="eventLocationTBD-1" name="eventLocationTBD" type="checkbox"
+                                            onclick="toggleInput(this,1)">TBD</input>
+                                    </label>
+                                </div>
+                                <div style="display: flex; flex-direction: row; ">
+                                    <label for="eventDate">📆 Date : </label>
+                                    <input id="eventDateId-1" type="date" name="eventDate" required />
+                                    <span>&nbsp;</span>
+                                    <span>&nbsp;</span>
+                                    <span>&nbsp;</span>
+                                    <br><br>
+                                    <label for="eventDateTBD">
+                                        <input id="eventDateTBD-1" name="eventDateTBD" type="checkbox" value="off"
+                                            onclick="toggleInput(this,1)">TBD</input>
+                                    </label>
+                                </div>
+                                <div style="display: flex; flex-direction: row;">
+                                    <label for="eventDetails">Details : </label>
+                                    <textarea id="eventDetails-1" rows="3" cols="30" name="eventDetails"></textarea>
+                                </div>
                             </div>
-                            <div style="display: flex; flex-direction: row; ">
-                                <label for="eventLocation">📍 Location : </label>
-                                <input type="text" id="eventLocationId-1" name="eventLocation" required>
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span>
-                                <br><br>
-                                <label for="eventLocationTBD">
-                                    <input id="eventLocationTBD-1" name="eventLocationTBD" type="checkbox"
-                                        onclick="toggleInput(this,1)">TBD</input>
-                                </label>
+                            <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px;  gap:20px">
+                                <div style="display: flex; flex-direction: row;">
+                                    <label for="cinematographers">🎥 Cinematographers : </label>
+                                    <input id="cinematographers-1" type="number" name="cinematographers" min="0"
+                                        value="1" required />
+                                </div>
+                                <div style="display: flex; flex-direction: row;">
+                                    <label for="candidPhotographers">📷 Candid Photographers : </label>
+                                    <input id="candidPhotographers-1" type="number" name="candidPhotographers" min="0"
+                                        value="1" required />
+                                </div>
                             </div>
-                            <div style="display: flex; flex-direction: row; ">
-                                <label for="eventDate">📆 Date : </label>
-                                <input id="eventDateId-1" type="date" name="eventDate" required />
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span>
-                                <br><br>
-                                <label for="eventDateTBD">
-                                    <input id="eventDateTBD-1" name="eventDateTBD" type="checkbox" value="off"
-                                        onclick="toggleInput(this,1)">TBD</input>
-                                </label>
+                            <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; gap:20px">
+                                <div style="display: flex; flex-direction: row;">
+                                    <label for="traditionalVideographers">📹 Traditional Videographers : </label>
+                                    <input id="traditionalVideographers-1" type="number" name="traditionalVideographers"
+                                        min="0" value="1" required />
+                                </div>
+                                <div style="display: flex; flex-direction: row;">
+                                    <label for="traditionalPhotographers">📸 Traditional Photographers : </label>
+                                    <input id="traditionalPhotographers-1" type="number" name="traditionalPhotographers"
+                                        min="0" value="1" required />
+                                </div>
                             </div>
-                            <div style="display: flex; flex-direction: row;">
-                                <label for="eventDetails">Details : </label>
-                                <textarea id="eventDetails-1" rows="3" cols="30" name="eventDetails"></textarea>
-                            </div>
-                        </div>
-                        <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px;  gap:20px">
-                            <div style="display: flex; flex-direction: row;">
-                                <label for="cinematographers">🎥 Cinematographers : </label>
-                                <input type="number" name="cinematographers" min="0" value="1" required />
-                            </div>
-                            <div style="display: flex; flex-direction: row;">
-                                <label for="candidPhotographers">📷 Candid Photographers : </label>
-                                <input type="number" name="candidPhotographers" min="0" value="1" required />
-                            </div>
-                        </div>
-                        <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; gap:20px">
-                            <div style="display: flex; flex-direction: row;">
-                                <label for="traditionalVideographers">📹 Traditional Videographers : </label>
-                                <input type="number" name="traditionalVideographers" min="0" value="1" required />
-                            </div>
-                            <div style="display: flex; flex-direction: row;">
-                                <label for="traditionalPhotographers">📸 Traditional Photographers : </label>
-                                <input type="number" name="traditionalPhotographers" min="0" value="1" required />
-                            </div>
-                        </div>
-                        <!-- <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
+                            <!-- <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
                             <div style="display: flex; flex-direction: row; width:50%">
                                 <label for="videographers">🎥 Videographers : </label>
                                 <input type="number" name="videographers" min="0" value="1" required>
@@ -131,13 +145,14 @@
                                 <input type="number" name="photographers" min="0" value="1" required>
                             </div>
                         </div> -->
+                        </div>
                     </div>
-                </div>
-                <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
-                    <button type="button" id="addEvent">+ Add Another Event</button>
-                    <i class="fa fa-trash-o" title="Remove Latest Event"
-                        style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeEvent()"></i>
-                </div>
+                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
+                        <button type="button" id="addEvent">+ Add Another Event</button>
+                        <i class="fa fa-trash-o" title="Remove Latest Event"
+                            style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeEvent()"></i>
+                    </div>
+                </section>
                 <section>
                     <h2>💵 Charges</h2>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
@@ -280,7 +295,7 @@
                             <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
                                 <label class="switch">
                                     <input title="Add Albums ?" type="checkbox" id="display-albums-CheckBoxId"
-                                        name="display-albums-CheckBox" checked
+                                        name="display-albums-CheckBox"
                                         onclick="disableEnableElement(['change-albums-CheckBoxId'])" />
                                     <span class="slider round"></span>
                                 </label>
@@ -305,7 +320,7 @@
                             </label>
                             <label> Film </label>
                             <textarea rows="2" cols="50" title="film" id="deliverables-film-Id" disabled
-                                required>A cinematic Film of 4-8 mins with best footages from all the events in cloud (delivered in 60 days )  </textarea>
+                                required>A cinematic Film of 3-5 mins with best footages from all the events in cloud (delivered in 60 days )  </textarea>
                             <label> Change Film ? </label>
                             <label class="switch">
                                 <input title="Change film" type="checkbox" id="change-film-CheckBoxId"
