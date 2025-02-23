@@ -5,7 +5,7 @@ const QUOTATION_COLL = "Quotations";
 const SEEDED_DATA_COLL = "Seeded_Data";
 const GREETINGS_DOC_ID = "Greetings_Doc";
 const COMPLIMENTARY_DOC_ID = "Complimentary_Doc";
-const DELIVERABLES_DOC_ID = "Deliverables_Doc";
+const DELIVERABLES_DOC_ID = "Deliverables";
 const EXTRA_REQUIREMENTS_DOC_ID = "Extra_Requirements_Doc";
 const TERMS_AND_CONDITIONS_DOC_ID = "Terms_And_Conditions_Doc";
 const CHARGES_DOC_ID = "Charges_Doc";
@@ -19,6 +19,8 @@ let deliverablesCount = 0;
 let greetingsCount = 0;
 let documentUrl;
 let hostUrl;
+let createInProgress = false;
+let editInProgress = false;
 
 
 // Initialize fireBase
@@ -32,6 +34,37 @@ function initDB() {
     messagingSenderId: "295918037477",
     appId: "1:295918037477:web:eb751a64d1a81094ee670c"
   };
+
+  /*const firebaseConfig = {
+    apiKey: "AIzaSyCvN9QjWH0-XVdScuB0lsWszBGdwWdOskA",
+    authDomain: "knoty-weddings-app.firebaseapp.com",
+    projectId: "knoty-weddings-app",
+    storageBucket: "knoty-weddings-app.firebasestorage.app",
+    messagingSenderId: "900573899497",
+    appId: "1:900573899497:web:4ec43e4249224e67d2de78",
+    measurementId: "G-8Y46SQ6F3F"
+  };*/
+
+  /*const firebaseConfig = {
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID
+  };*/
+
+  /* const firebaseConfig = {
+    apiKey: "AIzaSyDtFmFbzffrijSB6t9G7hYsmmjH1vPR0jU",
+    authDomain: "
+    -ea039.firebaseapp.com",
+    databaseURL: "https://kwphotography-ea039-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "kwphotography-ea039",
+    storageBucket: "kwphotography-ea039.firebasestorage.app",
+    messagingSenderId: "643669622642",
+    appId: "1:643669622642:web:af4d25f389a501629fa7eb",
+    measurementId: "G-3MFN4VCXMM"
+  };*/
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
@@ -74,7 +107,7 @@ async function addQuotation(quotation, deliverablesObj) {
     events: quotation.events,
     status: "Draft",
     addGst: quotation.addGst,
-    validUpTo: formatedToday.split(" ")[1] + "-" + formatedToday.split(" ")[0] + "-" + formatedToday.split(" ")[2],
+    validUpTo: editInProgress ? document.getElementById("editValidUpToId").value : formatedToday.split(" ")[1] + "-" + formatedToday.split(" ")[0] + "-" + formatedToday.split(" ")[2],
     mobile: quotation.mobile,
     splitTeam: quotation.splitTeam,
     Albums_Addon: quotation.Albums_Addon,
@@ -114,7 +147,7 @@ async function addQuotation(quotation, deliverablesObj) {
     quotationData.display_del_long_videos = deliverablesObj.disPlayDelLongVideos;
     quotationData.display_del_photos = deliverablesObj.disPlayDelPhotos;
     if (!quotation.Albums_Addon)
-    quotationData.display_del_albums = deliverablesObj.disPlayDelAlbums;
+      quotationData.display_del_albums = deliverablesObj.disPlayDelAlbums;
     quotationData.display_del_films = deliverablesObj.disPlayDelFilms;
     quotationData.display_del_reels = deliverablesObj.disPlayDelReels;
 
@@ -138,8 +171,16 @@ async function addQuotation(quotation, deliverablesObj) {
     }
   }
   try {
-    const docRef = await addDoc(quotationCollectionRef, quotationData);
-    documentId = docRef.id;
+    if (editInProgress) {
+      const editDocId = document.getElementById("editDocumentId").value;
+      const docRef = doc(db, QUOTATION_COLL, editDocId);
+      await updateDoc(docRef, quotationData);
+      documentId = editDocId;
+    }
+    if (createInProgress) {
+      const docRef = await addDoc(quotationCollectionRef, quotationData);
+      documentId = docRef.id;
+    }
     let urlTitle = quotation.title.replace(" & ", "-");
     documentUrl = `quotation.html?id=${urlTitle}:::${documentId}`;
 
@@ -155,8 +196,11 @@ async function addQuotation(quotation, deliverablesObj) {
   };
   await updateDoc(docRef, updatedData);
 
-  document.getElementById("formContainer").classList.toggle("hidden");
+  document.getElementById("quotationForm").reset();
 
+  document.getElementById("formContainer").classList.toggle("hidden");
+  createInProgress = false;
+  editInProgress = false;
   fetchQuotations();
 
 }
@@ -226,7 +270,8 @@ async function fetchQuotations() {
       <td><button style="background-color:#b30000" value="${doc.id}" id="rejectQuotation-${doc.id}">Reject</button></td>
       <td><button style="background-color:#00b369" value="${doc.id}" id="acceptQuotation-${doc.id}">Accept</button></td>
       <td><button style="background-color:#db1b1b" value="${doc.id}" id="deleteQuotation-${doc.id}">Delete</button>
-      <td>${quotation.created_date}</td>`
+      <td>${quotation.created_date}</td>
+      <td><button style="background-color:blue" value="${doc.id}" id="editProposal-${doc.id}">Edit</button></td>`
         ;
       row.innerHTML = quoteHTML;
       tableBody.appendChild(row);
@@ -238,19 +283,204 @@ async function fetchQuotations() {
   }
 }
 
+function addEventsForEdit(eventData, eCnt) {
+  let eventDateVal = (eventData.date == 'TBD') ? `TBD` : `${eventData.date.split("-")[2]}-${eventData.date.split("-")[1]}-${eventData.date.split("-")[0]}`;
+  const eventSection = document.getElementById('eventSection');
+  const newEvent = document.createElement('div');
+  newEvent.setAttribute("id", "Event-" + eCnt);
+  newEvent.classList.add('event');
+  let eventDateType = (eventDateVal == 'TBD') ? "text" : "date";
+  newEvent.innerHTML = `<h3>Event ${eCnt}</h3>
+                          <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
+                            <div style="display: flex; flex-direction: row; ">
+                                <label for="eventName">Event Name : </label>
+                                <input type="text"  id="eventNameId-${eCnt}" name="eventName" required value="${eventData.name}">
+                            </div>
+                            <div style="display: flex; flex-direction: row; ">
+                                <label for="eventLocation">📍 Location : </label>
+                                <input id="eventLocationId-${eCnt}" type="text" name="eventLocation" required value="${eventData.location}">
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span> 
+                                <br><br>
+                                <label for="eventLocationTBD"> TBD
+                                    <input id="eventLocationTBD-${eCnt}" name="eventLocationTBD" type="checkbox" onclick="toggleInput(this,${eCnt})">
+                                </label>
+                            </div>
+                            <div style="display: flex; flex-direction: row;">
+                                <label for="eventDate">📆 Date : </label>
+                                <input id="eventDateId-${eCnt}" type=${eventDateType} name="eventDate" required value="${eventDateVal}">
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span> 
+                                <br><br>
+                                <label for="eventDateTBD"> TBD
+                                    <input id="eventDateTBD-${eCnt}" name="eventDateTBD" type="checkbox"  onclick="toggleInput(this,${eCnt})">
+                                </label>
+                            </div>
+                            <div style="display: flex; flex-direction: row;">
+                                <label for="eventDetails">Details : </label>
+                                <textarea id="eventDetails-${eCnt}" rows="3" cols="30" name="eventDetails" value="${eventData.eventDetails}"></textarea>
+                            </div>
+                        </div>
+                          <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px;  gap:20px">
+                            <div style="display: flex; flex-direction: row;">
+                                <label for="cinematographers">🎥 Cinematographers : </label>
+                                <input id="cinematographers-${eCnt}" type="number" name="cinematographers" min="0" required value="${eventData.cinematographers}">
+                            </div>
+                            <div style="display: flex; flex-direction: row;">
+                                <label for="candidPhotographers">📷 Candid Photographers : </label>
+                                <input id="candidPhotographers-${eCnt}" type="number" name="candidPhotographers" min="0" required value="${eventData.candidPhotographers}">
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; gap:20px">
+                             <div style="display: flex; flex-direction: row;">
+                                <label for="traditionalVideographers">📹 Traditional Videographers : </label>
+                                <input id="traditionalVideographers-${eCnt}" type="number" name="traditionalVideographers" min="0" required value="${eventData.traditionalVideographers}">
+                            </div>
+                            <div style="display: flex; flex-direction: row;">
+                                <label for="traditionalPhotographers">📸 Traditional Photographers : </label>
+                                <input id="traditionalPhotographers-${eCnt}" type="number" name="traditionalPhotographers" min="0" required value="${eventData.traditionalPhotographers}">
+                            </div>
+                        </div>
+                        `;
+
+  eventSection.appendChild(newEvent);
+  //TO-DO
+  let eventDateTBDVal = (eventData.date == 'TBD') ? true : false;
+  let eventLocTBDVal = (eventData.location == 'TBD') ? true : false;
+  let locInputField = document.getElementById('eventLocationId-' + eCnt);
+  let dateInputField = document.getElementById('eventDateId-' + eCnt);
+  let locTBDField = document.getElementById('eventLocationTBD-' + eCnt);
+  let dateTBDField = document.getElementById('eventDateTBD-' + eCnt);
+  document.getElementById('eventDetails-' + eCnt).value = eventData.eventDetails;
+
+  if (eventDateTBDVal) {
+    dateTBDField.checked = true;
+    dateInputField.disabled = true;
+  } else {
+    dateInputField.disabled = false;
+    dateTBDField.checked = false;
+  }
+
+  if (eventLocTBDVal) {
+    locTBDField.checked = true;
+    locInputField.disabled = true;
+  }
+
+}
+
+async function editProposal(docId) {
+  createInProgress = false;
+  editInProgress = true;
+  document.getElementById("formTitle").textContent = "Edit Proposal";
+  const quotationDocRef = doc(db, QUOTATION_COLL, docId); // Reference to the 'Quotations' collection and the specific document ID
+  try {
+    const docSnap = await getDoc(quotationDocRef); // Fetch the document snapshot
+
+    if (docSnap.exists()) {
+      document.getElementById("quotationTable").classList.add("hidden");
+      document.getElementById("formContainer").classList.remove("hidden");
+      const quotation = docSnap.data();
+      document.getElementById("editDocumentId").value = docId;
+      document.getElementById("editValidUpToId").value = quotation.validUpTo;
+      document.getElementById("editValidUpToId").disabled = false;
+      document.getElementById("title").value = quotation.title;
+      document.getElementById("mobile").value = quotation.mobile;
+      document.getElementById("price").value = quotation.price;
+      document.getElementById("addGST").checked = quotation.addGst;
+      let eCnt = 1;
+      quotation.events.forEach(item => {
+        if (eCnt == 1) {
+          const eventSection = document.getElementById('eventSection');
+          while (eventSection.firstChild) {
+            eventSection.removeChild(eventSection.lastChild);
+          }
+          eventsCount = 1;
+          addEventsForEdit(item, eCnt);
+        } else {
+          addEventsForEdit(item, eCnt);
+          eventsCount = eventsCount + 1;
+        }
+        eCnt = eCnt + 1;
+      });
+      document.getElementById("albumsAddOnCheckBoxId").checked = quotation.Albums_Addon;
+      if (quotation.Albums_Addon) {
+        document.getElementById("albumsAddOnChangeCheckBoxId").checked = quotation.Albums_Addon_Changed;
+        document.getElementById("changeAlbumDelSec").classList.add("hidden");
+        document.getElementById("changeAlbumAddOnSec").classList.remove("hidden");
+        if (quotation.Albums_Addon_Changed) {
+          document.getElementById("albumsAddOnCostId").value = quotation.Albums_Addon_Price;
+          document.getElementById("albumsAddOnPhotosId").value = quotation.Albums_Addon_Photos;
+        }
+      } else {
+        document.getElementById("changeAlbumDelSec").classList.remove("hidden");
+      }
+      document.getElementById("hardDrivesCheckBoxId").checked = quotation.HD_Changed;
+      if (quotation.HD_Changed) {
+        document.getElementById("hardDrivesCountId").value = quotation.HD_Count;
+        document.getElementById("hardDrivesSizeId").value = quotation.HD_Size;
+      }
+      document.getElementById("ledScreensCheckBoxId").checked = quotation.LED_Changed;
+      if (quotation.LED_Changed) {
+        document.getElementById("ledScreensId").value = quotation.LED_Price;
+      }
+      document.getElementById("webLiveCheckBoxId").checked = quotation.WebLive_Changed;
+      if (quotation.WebLive_Changed) {
+        document.getElementById("webLiveId").value = quotation.WebLive_Price;
+        document.getElementById("webLiveTimeId").value = quotation.WebLive_Time;
+      }
+
+      document.getElementById("preWeddingPSReqCheckBoxId").checked = quotation.pwpsRequired;
+      if (quotation.pwpsRequired) {
+        document.getElementById("preWeddingShootCheckBoxId").checked = quotation.pwpsChange;
+        document.getElementById("preWeddingShootId").value = quotation.preWeddingPhotoShoot;
+      }
+
+      document.getElementById("dronesCheckBoxId").checked = quotation.droneRequired;
+
+      document.getElementById("change-deliverables-CheckBoxId").checked = quotation.delChange;
+      if (quotation.delChange) {
+        document.getElementById("changeDeliverables").classList.remove("hidden");
+        document.getElementById("display-photos-CheckBoxId").checked = quotation.display_del_photos;
+        document.getElementById("display-albums-CheckBoxId").checked = quotation.display_del_albums;
+        document.getElementById("display-film-CheckBoxId").checked = quotation.display_del_films;
+        document.getElementById("display-longVideos-CheckBoxId").checked = quotation.display_del_long_videos;
+        document.getElementById("display-rawData-CheckBoxId").checked = quotation.display_del_raw_data;
+        document.getElementById("display-reels-CheckBoxId").checked = quotation.display_del_reels;
+        if (quotation.del_albums)
+          document.getElementById("deliverables-albums-Id").value = quotation.del_albums;
+        if (quotation.del_photos)
+          document.getElementById("deliverables-photos-Id").value = quotation.del_photos;
+        if (quotation.del_films)
+          document.getElementById("deliverables-film-Id").value = quotation.del_films;
+        if (quotation.del_long_videos)
+          document.getElementById("deliverables-longVideos-Id").value = quotation.del_long_videos;
+        if (quotation.del_raw_data)
+          document.getElementById("deliverables-rawData-Id").value = quotation.del_raw_data;
+        if (quotation.del_reels)
+          document.getElementById("deliverables-reels-Id").value = quotation.del_reels;
+      }
+
+      // splitTeam = quotation.splitTeam;
+    }
+  } catch (error) {
+    console.error("Error fetching document:", error);
+  }
+}
+
+
 // update a quotation from fireBase
 async function updateQuotationStatus(documentId, status) {
 
   try {
     const isConfirmed = confirm("Are you sure you want to update status to " + status + " for this proposal?");
     if (isConfirmed) {
-      // Delete the row
       const docRef = doc(db, QUOTATION_COLL, documentId);
 
       const updatedData = {
         ['status']: status, // Dynamically set the field to update
       };
-      //await deleteDoc(quotationCollectionRef); // Deletes the document
       await updateDoc(docRef, updatedData);
       alert("Proposal " + status + " successfully! Please update the status properly.");
       fetchQuotations();
@@ -412,15 +642,69 @@ function removeEvent() {
   }
 }
 
-// Event listeners
-document.getElementById("createQuotation").addEventListener("click", () => {
-  document.getElementById("formContainer").classList.toggle("hidden");
+function clearDataForNewProposal() {
+  while (eventsCount > 1)
+    removeEvent();
+  document.getElementById("quotationForm").reset();
+  const fields = ["eventDateId-1", "eventNameId-1", "eventLocationId-1"]; // List of IDs
+  fields.forEach(id => {
+    document.getElementById(id).value = "";
+    document.getElementById(id).disabled = false;
+    if (id.startsWith('eventDate')) {
+      document.getElementById(id).type = "date";
+    }
+  });
+
+  const crewFields = ["candidPhotographers-1", "cinematographers-1", "traditionalPhotographers-1", "traditionalVideographers-1"]; // List of IDs
+  crewFields.forEach(id => document.getElementById(id).value = "1");
+
+  const hiddenFields = ["changeAlbumAddOnSec", "changeAlbumDelSec", "changeDeliverables"]
+  hiddenFields.forEach(id => document.getElementById(id).classList.add("hidden"));
+
+  const disableFields = ["deliverables-photos-Id", "deliverables-albums-Id", "deliverables-film-Id", "deliverables-longVideos-Id",
+    "deliverables-rawData-Id", "deliverables-reels-Id", "change-reels-CheckBoxId", "albumsAddOnCostId", "editValidUpToId",
+    "albumsAddOnPhotosId", "hardDrivesCountId", "hardDrivesSizeId", "ledScreensId", "webLiveId", "webLiveTimeId", "preWeddingShootId"
+  ]
+  disableFields.forEach(id => document.getElementById(id).disabled = true);
+
+}
+
+function openNewProposalForm() {
+  editInProgress = false;
+  createInProgress = true;
+  document.getElementById("formTitle").textContent = "New Proposal";
+  clearDataForNewProposal();
+  document.getElementById("quotationTable").classList.add("hidden");
+  document.getElementById("formContainer").classList.remove("hidden");
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
   document.getElementById("greetingsSection").classList.add("hidden");
+}
+
+// Event listeners
+document.getElementById("createQuotation").addEventListener("click", () => {
+  if (createInProgress || editInProgress) {
+    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    if (isConfirmed) {
+      openNewProposalForm();
+    }
+  } else {
+    openNewProposalForm();
+  }
 });
 
-document.getElementById("fetchQuotations").addEventListener("click", fetchQuotations);
+document.getElementById("fetchQuotations").addEventListener("click", () => {
+  if (createInProgress || editInProgress) {
+    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    if (isConfirmed) {
+      createInProgress = false;
+      editInProgress = false;
+      fetchQuotations();
+    }
+  } else {
+    fetchQuotations();
+  }
+});
 
 document.getElementById("addEvent").addEventListener("click", addEvent);
 
@@ -440,6 +724,9 @@ document.getElementById('quotationTable').addEventListener('click', (event) => {
   }
   else if (event.target && event.target.id.startsWith('deleteQuotation')) {
     deleteQuotation(event.target.value);
+  }
+  else if (event.target && event.target.id.startsWith('editProposal')) {
+    editProposal(event.target.value);
   }
 });
 
@@ -510,6 +797,7 @@ document.getElementById("quotationForm").addEventListener("submit", (event) => {
   }
 
   addQuotation(quotation, deliverablesObj);
+
 });
 
 async function getDocumentData(collection_name, document_id) {
@@ -526,7 +814,16 @@ async function getDocumentData(collection_name, document_id) {
 }
 
 document.getElementById('editTermsAndConditions').addEventListener('click', (event) => {
-  displayTermsAndConditions();
+  if (createInProgress || editInProgress) {
+    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    if (isConfirmed) {
+      createInProgress = false;
+      editInProgress = false;
+      displayTermsAndConditions();
+    }
+  } else {
+    displayTermsAndConditions();
+  }
 });
 
 async function displayTermsAndConditions() {
@@ -586,7 +883,16 @@ async function saveTermsAndConditions() {
 }
 
 document.getElementById('editDeliverables').addEventListener('click', (event) => {
-  displayDeliverables();
+  if (createInProgress || editInProgress) {
+    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    if (isConfirmed) {
+      createInProgress = false;
+      editInProgress = false;
+      displayDeliverables();
+    }
+  } else {
+    displayDeliverables();
+  }
 });
 
 async function displayDeliverables() {
@@ -655,7 +961,16 @@ document.getElementById('albumsAddOnCheckBoxId').addEventListener('click', (even
 });
 
 document.getElementById('editGreetings').addEventListener('click', (event) => {
-  displayGreetings();
+  if (createInProgress || editInProgress) {
+    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    if (isConfirmed) {
+      createInProgress = false;
+      editInProgress = false;
+      displayGreetings();
+    }
+  } else {
+    displayGreetings();
+  }
 });
 
 async function displayGreetings() {
