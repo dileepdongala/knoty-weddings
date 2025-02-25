@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, addDoc, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, addDoc, updateDoc, getDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
 const QUOTATION_COLL = "Quotations";
 const SEEDED_DATA_COLL = "Seeded_Data";
@@ -21,6 +21,7 @@ let documentUrl;
 let hostUrl;
 let createInProgress = false;
 let editInProgress = false;
+let oldTitleInEdit;
 
 
 // Initialize fireBase
@@ -182,7 +183,8 @@ async function addQuotation(quotation, deliverablesObj) {
       documentId = docRef.id;
     }
     let urlTitle = quotation.title.replace(" & ", "-");
-    documentUrl = `quotation.html?id=${urlTitle}:::${documentId}`;
+    //documentUrl = `quotation.html?id=${urlTitle}:::${documentId}`;
+    documentUrl = `/${urlTitle}`;
 
     // Open the quotation in a new tab
     window.open(hostUrl + documentUrl, "_blank");
@@ -242,7 +244,7 @@ async function fetchQuotations() {
     querySnapshot.forEach((doc) => {
       const quotation = doc.data();
       const row = document.createElement("tr");
-      let completeUrl = hostUrl + quotation.url
+      let completeUrl = hostUrl + `/${quotation.title}`
       documentUrl = quotation.url;
       let quoteHTML = `
           <td>${quotation.title}</td>
@@ -382,6 +384,7 @@ async function editProposal(docId) {
       document.getElementById("quotationTable").classList.add("hidden");
       document.getElementById("formContainer").classList.remove("hidden");
       const quotation = docSnap.data();
+      oldTitleInEdit = quotation.title;
       document.getElementById("editDocumentId").value = docId;
       document.getElementById("editValidUpToId").value = quotation.validUpTo;
       document.getElementById("editValidUpToId").disabled = false;
@@ -407,14 +410,11 @@ async function editProposal(docId) {
       document.getElementById("albumsAddOnCheckBoxId").checked = quotation.Albums_Addon;
       if (quotation.Albums_Addon) {
         document.getElementById("albumsAddOnChangeCheckBoxId").checked = quotation.Albums_Addon_Changed;
-        document.getElementById("changeAlbumDelSec").classList.add("hidden");
         document.getElementById("changeAlbumAddOnSec").classList.remove("hidden");
         if (quotation.Albums_Addon_Changed) {
           document.getElementById("albumsAddOnCostId").value = quotation.Albums_Addon_Price;
           document.getElementById("albumsAddOnPhotosId").value = quotation.Albums_Addon_Photos;
         }
-      } else {
-        document.getElementById("changeAlbumDelSec").classList.remove("hidden");
       }
       document.getElementById("hardDrivesCheckBoxId").checked = quotation.HD_Changed;
       if (quotation.HD_Changed) {
@@ -658,7 +658,7 @@ function clearDataForNewProposal() {
   const crewFields = ["candidPhotographers-1", "cinematographers-1", "traditionalPhotographers-1", "traditionalVideographers-1"]; // List of IDs
   crewFields.forEach(id => document.getElementById(id).value = "1");
 
-  const hiddenFields = ["changeAlbumAddOnSec", "changeAlbumDelSec", "changeDeliverables"]
+  const hiddenFields = ["changeAlbumAddOnSec", "changeDeliverables"]
   hiddenFields.forEach(id => document.getElementById(id).classList.add("hidden"));
 
   const disableFields = ["deliverables-photos-Id", "deliverables-albums-Id", "deliverables-film-Id", "deliverables-longVideos-Id",
@@ -684,7 +684,7 @@ function openNewProposalForm() {
 // Event listeners
 document.getElementById("createQuotation").addEventListener("click", () => {
   if (createInProgress || editInProgress) {
-    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    const isConfirmed = confirm("Ohh ! You have not saved the changes. Are you sure you want to move  ?");
     if (isConfirmed) {
       openNewProposalForm();
     }
@@ -695,7 +695,7 @@ document.getElementById("createQuotation").addEventListener("click", () => {
 
 document.getElementById("fetchQuotations").addEventListener("click", () => {
   if (createInProgress || editInProgress) {
-    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    const isConfirmed = confirm("Ohh ! You have not saved the changes. Are you sure you want to move ?");
     if (isConfirmed) {
       createInProgress = false;
       editInProgress = false;
@@ -730,73 +730,87 @@ document.getElementById('quotationTable').addEventListener('click', (event) => {
   }
 });
 
-document.getElementById("quotationForm").addEventListener("submit", (event) => {
+document.getElementById("quotationForm").addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const title = document.getElementById("title").value;
-  const price = document.getElementById("price").value;
-  const addGst = document.getElementById("addGST").checked;
-  const mobile = document.getElementById("mobile").value;
-  const Albums_Addon = document.getElementById("albumsAddOnCheckBoxId").checked;
-  const Albums_Addon_Changed = document.getElementById("albumsAddOnChangeCheckBoxId").checked;
-  const Albums_Addon_Price = document.getElementById("albumsAddOnCostId").value;
-  const Albums_Addon_Photos = document.getElementById("albumsAddOnPhotosId").value;
-  const HD_Changed = document.getElementById("hardDrivesCheckBoxId").checked;
-  const HD_Count = document.getElementById("hardDrivesCountId").value;
-  const HD_Size = document.getElementById("hardDrivesSizeId").value;
-  const LED_Changed = document.getElementById("ledScreensCheckBoxId").checked;
-  const LED_Price = document.getElementById("ledScreensId").value;
-  const WebLive_Changed = document.getElementById("webLiveCheckBoxId").checked;
-  const WebLive_Price = document.getElementById("webLiveId").value;
-  const WebLive_Time = document.getElementById("webLiveTimeId").value;
-  const pwpsRequired = document.getElementById("preWeddingPSReqCheckBoxId").checked;
-  const pwpsChange = document.getElementById("preWeddingShootCheckBoxId").checked;
-  const preWeddingPhotoShoot = document.getElementById("preWeddingShootId").value;
-  const droneRequired = document.getElementById("dronesCheckBoxId").checked;
-  const delChange = document.getElementById("change-deliverables-CheckBoxId").checked;
-  const splitTeam = true;
-  const events = Array.from(document.querySelectorAll('.event')).map(event => ({
-    name: event.querySelector('input[name="eventName"]').value,
-    location: event.querySelector('input[name="eventLocation"]').value,
-    eventDetails: event.querySelector('textarea[name="eventDetails"]').value,
-    date: event.querySelector('input[name="eventDate"]').value == 'TBD' ?
-      `TBD` :
-      `${event.querySelector('input[name="eventDate"]').value.split("-")[2]}-${event.querySelector('input[name="eventDate"]').value.split("-")[1]}-${event.querySelector('input[name="eventDate"]').value.split("-")[0]}`,
-    cinematographers: event.querySelector('input[name="cinematographers"]').value,
-    candidPhotographers: event.querySelector('input[name="candidPhotographers"]').value,
-    traditionalPhotographers: event.querySelector('input[name="traditionalPhotographers"]').value,
-    traditionalVideographers: event.querySelector('input[name="traditionalVideographers"]').value,
-    // videographers: event.querySelector('input[name="videographers"]').value,
-    // photographers: event.querySelector('input[name="photographers"]').value
-  }));
 
-  const quotation =
-    { title, events, price, addGst, mobile, splitTeam, Albums_Addon, Albums_Addon_Changed, Albums_Addon_Price, Albums_Addon_Photos, HD_Changed, HD_Count, HD_Size, LED_Changed, LED_Price, WebLive_Changed, WebLive_Price, WebLive_Time, pwpsRequired, pwpsChange, preWeddingPhotoShoot, droneRequired };
-  let deliverablesObj = { delChange };
+  const titleError = document.getElementById("titleError");
+  const titleName = document.getElementById("title");
+  const isValidTitle = await validateTitle(title);
+  if (isValidTitle) {
+    titleError.textContent = "Title already exists. Please re-arrange it";
+    titleName.classList.add("invalid");
+    const isConfirmed = confirm("Please change Title. This title is not available to use ?");
+    return;
+  } else {
+    titleError.textContent = "";
+    titleName.classList.remove("invalid");
+    const price = document.getElementById("price").value;
+    const addGst = document.getElementById("addGST").checked;
+    const mobile = document.getElementById("mobile").value;
+    const Albums_Addon = document.getElementById("albumsAddOnCheckBoxId").checked;
+    const Albums_Addon_Changed = document.getElementById("albumsAddOnChangeCheckBoxId").checked;
+    const Albums_Addon_Price = document.getElementById("albumsAddOnCostId").value;
+    const Albums_Addon_Photos = document.getElementById("albumsAddOnPhotosId").value;
+    const HD_Changed = document.getElementById("hardDrivesCheckBoxId").checked;
+    const HD_Count = document.getElementById("hardDrivesCountId").value;
+    const HD_Size = document.getElementById("hardDrivesSizeId").value;
+    const LED_Changed = document.getElementById("ledScreensCheckBoxId").checked;
+    const LED_Price = document.getElementById("ledScreensId").value;
+    const WebLive_Changed = document.getElementById("webLiveCheckBoxId").checked;
+    const WebLive_Price = document.getElementById("webLiveId").value;
+    const WebLive_Time = document.getElementById("webLiveTimeId").value;
+    const pwpsRequired = document.getElementById("preWeddingPSReqCheckBoxId").checked;
+    const pwpsChange = document.getElementById("preWeddingShootCheckBoxId").checked;
+    const preWeddingPhotoShoot = document.getElementById("preWeddingShootId").value;
+    const droneRequired = document.getElementById("dronesCheckBoxId").checked;
+    const delChange = document.getElementById("change-deliverables-CheckBoxId").checked;
+    const splitTeam = true;
+    const events = Array.from(document.querySelectorAll('.event')).map(event => ({
+      name: event.querySelector('input[name="eventName"]').value,
+      location: event.querySelector('input[name="eventLocation"]').value,
+      eventDetails: event.querySelector('textarea[name="eventDetails"]').value,
+      date: event.querySelector('input[name="eventDate"]').value == 'TBD' ?
+        `TBD` :
+        `${event.querySelector('input[name="eventDate"]').value.split("-")[2]}-${event.querySelector('input[name="eventDate"]').value.split("-")[1]}-${event.querySelector('input[name="eventDate"]').value.split("-")[0]}`,
+      cinematographers: event.querySelector('input[name="cinematographers"]').value,
+      candidPhotographers: event.querySelector('input[name="candidPhotographers"]').value,
+      traditionalPhotographers: event.querySelector('input[name="traditionalPhotographers"]').value,
+      traditionalVideographers: event.querySelector('input[name="traditionalVideographers"]').value,
+      // videographers: event.querySelector('input[name="videographers"]').value,
+      // photographers: event.querySelector('input[name="photographers"]').value
+    }));
 
-  if (delChange) {
-    const disPlayDelPhotos = document.getElementById("display-photos-CheckBoxId").checked;
-    const changeDelPhotos = document.getElementById("change-photos-CheckBoxId").checked;
-    const updatedDelPhotos = document.getElementById("deliverables-photos-Id").value;
-    const disPlayDelAlbums = document.getElementById("display-albums-CheckBoxId").checked;
-    const changeDelAlbums = document.getElementById("change-albums-CheckBoxId").checked;
-    const updatedDelAlbums = document.getElementById("deliverables-albums-Id").value;
-    const disPlayDelFilms = document.getElementById("display-film-CheckBoxId").checked;
-    const changeDelFilms = document.getElementById("change-film-CheckBoxId").checked;
-    const updatedDelFilms = document.getElementById("deliverables-film-Id").value;
-    const disPlayDelReels = document.getElementById("display-reels-CheckBoxId").checked;
-    const changeDelReels = document.getElementById("change-reels-CheckBoxId").checked;
-    const updatedDelReels = document.getElementById("deliverables-reels-Id").value;
-    const disPlayDelLongVideos = document.getElementById("display-longVideos-CheckBoxId").checked;
-    const changeDelLongVideos = document.getElementById("change-longVideos-CheckBoxId").checked;
-    const updatedDelLongVideos = document.getElementById("deliverables-longVideos-Id").value;
-    const disPlayDelRawData = document.getElementById("display-rawData-CheckBoxId").checked;
-    const changeDelRawData = document.getElementById("change-rawData-CheckBoxId").checked;
-    const updatedDelRawData = document.getElementById("deliverables-rawData-Id").value;
-    deliverablesObj = { delChange, disPlayDelRawData, changeDelRawData, updatedDelRawData, disPlayDelLongVideos, changeDelLongVideos, updatedDelLongVideos, disPlayDelPhotos, changeDelPhotos, updatedDelPhotos, disPlayDelAlbums, changeDelAlbums, updatedDelAlbums, disPlayDelFilms, changeDelFilms, updatedDelFilms, disPlayDelReels, changeDelReels, updatedDelReels }
+    const quotation =
+      { title, events, price, addGst, mobile, splitTeam, Albums_Addon, Albums_Addon_Changed, Albums_Addon_Price, Albums_Addon_Photos, HD_Changed, HD_Count, HD_Size, LED_Changed, LED_Price, WebLive_Changed, WebLive_Price, WebLive_Time, pwpsRequired, pwpsChange, preWeddingPhotoShoot, droneRequired };
+    let deliverablesObj = { delChange };
+
+    if (delChange) {
+      const disPlayDelPhotos = document.getElementById("display-photos-CheckBoxId").checked;
+      const changeDelPhotos = document.getElementById("change-photos-CheckBoxId").checked;
+      const updatedDelPhotos = document.getElementById("deliverables-photos-Id").value;
+      const disPlayDelAlbums = document.getElementById("display-albums-CheckBoxId").checked;
+      const changeDelAlbums = document.getElementById("change-albums-CheckBoxId").checked;
+      const updatedDelAlbums = document.getElementById("deliverables-albums-Id").value;
+      const disPlayDelFilms = document.getElementById("display-film-CheckBoxId").checked;
+      const changeDelFilms = document.getElementById("change-film-CheckBoxId").checked;
+      const updatedDelFilms = document.getElementById("deliverables-film-Id").value;
+      const disPlayDelReels = document.getElementById("display-reels-CheckBoxId").checked;
+      const changeDelReels = document.getElementById("change-reels-CheckBoxId").checked;
+      const updatedDelReels = document.getElementById("deliverables-reels-Id").value;
+      const disPlayDelLongVideos = document.getElementById("display-longVideos-CheckBoxId").checked;
+      const changeDelLongVideos = document.getElementById("change-longVideos-CheckBoxId").checked;
+      const updatedDelLongVideos = document.getElementById("deliverables-longVideos-Id").value;
+      const disPlayDelRawData = document.getElementById("display-rawData-CheckBoxId").checked;
+      const changeDelRawData = document.getElementById("change-rawData-CheckBoxId").checked;
+      const updatedDelRawData = document.getElementById("deliverables-rawData-Id").value;
+      deliverablesObj = { delChange, disPlayDelRawData, changeDelRawData, updatedDelRawData, disPlayDelLongVideos, changeDelLongVideos, updatedDelLongVideos, disPlayDelPhotos, changeDelPhotos, updatedDelPhotos, disPlayDelAlbums, changeDelAlbums, updatedDelAlbums, disPlayDelFilms, changeDelFilms, updatedDelFilms, disPlayDelReels, changeDelReels, updatedDelReels }
+    }
+
+    addQuotation(quotation, deliverablesObj);
+
   }
-
-  addQuotation(quotation, deliverablesObj);
 
 });
 
@@ -815,7 +829,7 @@ async function getDocumentData(collection_name, document_id) {
 
 document.getElementById('editTermsAndConditions').addEventListener('click', (event) => {
   if (createInProgress || editInProgress) {
-    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    const isConfirmed = confirm("Ohh ! You have not saved the changes. Are you sure you want to move  ?");
     if (isConfirmed) {
       createInProgress = false;
       editInProgress = false;
@@ -884,7 +898,7 @@ async function saveTermsAndConditions() {
 
 document.getElementById('editDeliverables').addEventListener('click', (event) => {
   if (createInProgress || editInProgress) {
-    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    const isConfirmed = confirm("Ohh ! You have not saved the changes. Are you sure you want to move  ?");
     if (isConfirmed) {
       createInProgress = false;
       editInProgress = false;
@@ -957,12 +971,11 @@ document.getElementById('change-deliverables-CheckBoxId').addEventListener('clic
 
 document.getElementById('albumsAddOnCheckBoxId').addEventListener('click', (event) => {
   document.getElementById("changeAlbumAddOnSec").classList.toggle("hidden");
-  document.getElementById("changeAlbumDelSec").classList.toggle("hidden");
 });
 
 document.getElementById('editGreetings').addEventListener('click', (event) => {
   if (createInProgress || editInProgress) {
-    const isConfirmed = confirm("Are you sure you want to Create New proposal ?");
+    const isConfirmed = confirm("Ohh ! You have not saved the changes. Are you sure you want to move  ?");
     if (isConfirmed) {
       createInProgress = false;
       editInProgress = false;
@@ -1035,6 +1048,16 @@ function disableEnableElement(idArr) {
   idArr.forEach(item => {
     document.getElementById(item).disabled = !document.getElementById(item).disabled;
   })
+}
+
+async function validateTitle(customerName) {
+  const customersRef = collection(db, QUOTATION_COLL);
+  const q = query(customersRef, where("title", "==", customerName));
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot && querySnapshot.size > 0 && (createInProgress || (editInProgress && oldTitleInEdit != customerName))) {
+    return true;
+  }
+  return false;
 }
 
 // Disable right-click context menu
