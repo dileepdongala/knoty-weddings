@@ -244,13 +244,13 @@ async function fetchQuotations() {
     querySnapshot.forEach((doc) => {
       const quotation = doc.data();
       const row = document.createElement("tr");
-      let completeUrl = hostUrl + `/${quotation.title}`
+      let completeUrl = hostUrl + `${quotation.url}`
       documentUrl = quotation.url;
       let quoteHTML = `
           <td>${quotation.title}</td>
-          <td>₹ ${quotation.price} /-</td>
+          <td>₹${quotation.price}/-</td>
           <td><a href="${completeUrl}" target="_blank">Open</a></td>
-          <td>+ ${quotation.mobile}</td>
+          <td>+${quotation.mobile}</td>
           <td> <i onclick="sendWhatsAppMessage(${quotation.mobile},'${doc.id}')" class="fa fa-whatsapp" style="cursor: pointer;font-size:40px;"></i></td>`
       if (quotation.status == "Expired") {
         quoteHTML += `<td>🔶 Expired</td>
@@ -273,7 +273,8 @@ async function fetchQuotations() {
       <td><button style="background-color:#00b369" value="${doc.id}" id="acceptQuotation-${doc.id}">Accept</button></td>
       <td><button style="background-color:#db1b1b" value="${doc.id}" id="deleteQuotation-${doc.id}">Delete</button>
       <td>${quotation.created_date}</td>
-      <td><button style="background-color:blue" value="${doc.id}" id="editProposal-${doc.id}">Edit</button></td>`
+      <td><button style="background-color:blue" value="${doc.id}" id="editProposal-${doc.id}">Edit</button></td>
+      <td>${doc.id}</td>`
         ;
       row.innerHTML = quoteHTML;
       tableBody.appendChild(row);
