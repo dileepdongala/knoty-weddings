@@ -3,14 +3,14 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: rgb(8, 110, 126);
+    background-color: rgb(74, 83, 84);
   }
   
   header {
     display: flex;
     gap: 10px;
     padding: 10px;
-    background-color: rgb(8, 110, 126);
+    background-color:  rgb(74, 83, 84);
     color: white;
   }
   
@@ -23,6 +23,7 @@ body {
     border-radius: 15px;
     margin: 10px;
     width: fit-content;
+    font-family: cursive;
   }
   
   button:hover {
@@ -40,10 +41,11 @@ body {
   }
   
   #quotationTable th, #quotationTable td {
-    border: 1px solid #ccc;
-    padding: 10px;
+    border: 1px solid #7a7a7a;
+    padding: 5px;
     text-align: left;
     color : rgb(209, 237, 57);
+    font-family: cursive;
   }
   
   form {
@@ -51,8 +53,8 @@ body {
     flex-direction: column;
     gap: 10px;
     padding: 20px;
-    background-color: rgb(8, 110, 126);
-    border: 1px solid #ccc;
+    background-color:  rgb(74, 83, 84);
+    border: 5px solid #5b4949;
     margin: 20px;
   }
   
@@ -63,10 +65,12 @@ body {
     color: rgb(249, 203, 156);
     margin: 5px;
     justify-content: center;
+    font-family: cursive;
   }
 
   a,h2,h3 {
-    color : rgb(209, 237, 57);
+    color : rgb(170, 199, 42);
+    font-family: cursive;
   }
   
   #addEventBtn {
@@ -74,8 +78,10 @@ body {
   }
 
   input,textarea {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     width : min-content;
-    background-color: #6fa7a7;
+    background-color: #868c8c;
+    border: darkslategray;
   }
 
   .switch {
@@ -117,4 +123,11 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(14px);
 }
-  
+.error {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 4px;
+}
+.invalid {
+  border-color: red;
+}  
