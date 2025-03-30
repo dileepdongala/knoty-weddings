@@ -389,6 +389,7 @@ async function editProposal(docId) {
       document.getElementById("editDocumentId").value = docId;
       document.getElementById("editValidUpToId").value = quotation.validUpTo;
       document.getElementById("editValidUpToId").disabled = false;
+      document.getElementById("editValidUpToIdDiv").classList.remove("hidden");
       document.getElementById("title").value = quotation.title;
       document.getElementById("mobile").value = quotation.mobile;
       document.getElementById("price").value = quotation.price;
@@ -540,6 +541,14 @@ export function toggleInput(checkbox, eventNum) {
 window.toggleInput = toggleInput;
 window.sendWhatsAppMessage = sendWhatsAppMessage;
 window.removeEvent = removeEvent;
+window.hideElement = hideElement;
+
+function hideElement(valueId, hideId) {
+  if(document.getElementById(valueId).checked)
+  document.getElementById(hideId).classList.remove("hidden");
+  else
+  document.getElementById(hideId).classList.add("hidden");
+}
 
 async function sendWhatsAppMessage(number, docId) {
   const docRef = doc(db, QUOTATION_COLL, docId);
@@ -659,7 +668,7 @@ function clearDataForNewProposal() {
   const crewFields = ["candidPhotographers-1", "cinematographers-1", "traditionalPhotographers-1", "traditionalVideographers-1"]; // List of IDs
   crewFields.forEach(id => document.getElementById(id).value = "1");
 
-  const hiddenFields = ["changeAlbumAddOnSec", "changeDeliverables"]
+  const hiddenFields = ["changeDeliverables"]
   hiddenFields.forEach(id => document.getElementById(id).classList.add("hidden"));
 
   const disableFields = ["deliverables-photos-Id", "deliverables-albums-Id", "deliverables-film-Id", "deliverables-longVideos-Id",
@@ -680,9 +689,11 @@ function openNewProposalForm() {
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
   document.getElementById("greetingsSection").classList.add("hidden");
+  document.getElementById("editValidUpToIdDiv").classList.add("hidden");
 }
 
 // Event listeners
+
 document.getElementById("createQuotation").addEventListener("click", () => {
   if (createInProgress || editInProgress) {
     const isConfirmed = confirm("Ohh ! You have not saved the changes. Are you sure you want to move  ?");
@@ -968,10 +979,6 @@ async function saveDeliverables() {
 
 document.getElementById('change-deliverables-CheckBoxId').addEventListener('click', (event) => {
   document.getElementById("changeDeliverables").classList.toggle("hidden");
-});
-
-document.getElementById('albumsAddOnCheckBoxId').addEventListener('click', (event) => {
-  document.getElementById("changeAlbumAddOnSec").classList.toggle("hidden");
 });
 
 document.getElementById('editGreetings').addEventListener('click', (event) => {
