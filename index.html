@@ -25,7 +25,7 @@
         <div class="buttons">
             <button id="createQuotation">New Proposal</button>
             <button id="fetchQuotations">Poposals</button>
-            <button id="editDeliverables">✓ Deliverables</button>
+            <button id="editDeliverables" hidden>✓ Deliverables</button>
             <button id="editTermsAndConditions">📑 Terms And Conditions</button>
             <button id="editGreetings">🤝 Greetings</button>
         </div>
@@ -68,9 +68,11 @@
                         <div style="display: flex; flex-direction: row; ">
                             <input type="text" id="editDocumentId" hidden />
                         </div>
-                        <div id="validityId" style="display: flex; flex-direction: row; ">
-                            <label for="mobile">Valid Up to (Edit purpose) : </label>
-                            <input type="text" id="editValidUpToId" disabled />
+                        <div id="editValidUpToIdDiv" class="hidden">
+                            <div id="validityId" style="display: flex; flex-direction: row; ">
+                                <label for="mobile">Valid Up to (Edit purpose) : </label>
+                                <input type="text" id="editValidUpToId" disabled />
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -171,13 +173,43 @@
                 <section>
                     <h2>Other Details</h2>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label> Include Albums as Add-on service ? </label>
+                        <label> Include Drone as Complimentary ? </label>
                         <label class="switch">
-                            <input type="checkbox" id="albumsAddOnCheckBoxId" name="albumsAddOnCheckBox" />
+                            <input type="checkbox" id="dronesCheckBoxId" name="dronesCheckBox" checked />
+                            <span class="slider round"></span>
+                        </label>
+                        <label>*Drone is complimentary for wedding*</label>
+                    </div>
+                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                        <label> Include Pre-Wedding Photo shoot as Complimentary? </label>
+                        <label class="switch">
+                            <input type="checkbox" id="preWeddingPSReqCheckBoxId" name="preWeddingPSReqCheckBox" checked
+                                onclick="hideElement('preWeddingPSReqCheckBoxId','changePWPSSectionDiv')" />
                             <span class="slider round"></span>
                         </label>
                     </div>
-                    <div id="changeAlbumAddOnSec" class="hidden">
+                    <div id="changePWPSSectionDiv">
+                        <div id="changePWPSSection"
+                            style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                            <label> Do you want to change Pre-Wedding Photo shoot Section ? </label>
+                            <label class="switch">
+                                <input type="checkbox" id="preWeddingShootCheckBoxId" name="preWeddingShootCheckBox"
+                                    onclick="disableEnableElement(['preWeddingShootId'])" />
+                                <span class="slider round"></span>
+                            </label>
+                            <textarea rows="2" cols="50" title="Pre Wedding Shoot" id="preWeddingShootId" disabled
+                                required>You will receive a collection of 50 beautifully edited & retouched images in cloud gallery</textarea>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                        <label> Include Albums as Add-on service ? </label>
+                        <label class="switch">
+                            <input type="checkbox" id="albumsAddOnCheckBoxId" name="albumsAddOnCheckBox" checked
+                                onclick="hideElement('albumsAddOnCheckBoxId','changeAlbumAddOnSec')" />
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div id="changeAlbumAddOnSec">
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
                             <label> Do you want to change Albums Section in Add-on Services ? </label>
                             <label class="switch">
@@ -235,44 +267,25 @@
                             disabled required />
                         <label> hours </label>
                     </div>
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label> Include Pre-Wedding Photo shoot as Complimentary? </label>
-                        <label class="switch">
-                            <input type="checkbox" id="preWeddingPSReqCheckBoxId" name="preWeddingPSReqCheckBox"
-                                checked />
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div id="changePWPSSection"
-                        style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label> Do you want to change Pre-Wedding Photo shoot Section ? </label>
-                        <label class="switch">
-                            <input type="checkbox" id="preWeddingShootCheckBoxId" name="preWeddingShootCheckBox"
-                                onclick="disableEnableElement(['preWeddingShootId'])" />
-                            <span class="slider round"></span>
-                        </label>
-                        <textarea rows="2" cols="50" title="Pre Wedding Shoot" id="preWeddingShootId" disabled
-                            required>You will receive a collection of 50 beautifully edited & retouched images in cloud gallery</textarea>
-                    </div>
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label> Include Drone as Complimentary ? </label>
-                        <label class="switch">
-                            <input type="checkbox" id="dronesCheckBoxId" name="dronesCheckBox" checked />
-                            <span class="slider round"></span>
-                        </label>
-                        <label>*Drone is complimentary for wedding*</label>
-                    </div>
                 </section>
 
                 <section>
                     <h2>Deliverables</h2>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label>Change Default Deliverables ?</label>
-                        <label class="switch">
-                            <input title="Change Default Deliverables ?" type="checkbox"
-                                id="change-deliverables-CheckBoxId" name="change-deliverables-CheckBox" />
-                            <span class="slider round"></span>
-                        </label>
+                        <div style="display: flex; flex-direction: column; flex-wrap: wrap; margin: 20px; gap:10px">
+                            <label>1. 1000 Handpicked & Edited images in Cloud (delivered in 20 days )</label>
+                            <label>2. A cinematic Film of 3-5 mins with best footages from all the events in cloud
+                                (delivered in 60 days ) </label>
+                            <label>3. Full Length Documented long videos for all the events in hard drives (delivered in
+                                60 days ) </label>
+                            <label>4. All Raw data, Edited photos & videos in Hard drives </label>
+                            <h2>Change Default Deliverables ?</h2>
+                            <label class="switch">
+                                <input title="Change Default Deliverables ?" type="checkbox"
+                                    id="change-deliverables-CheckBoxId" name="change-deliverables-CheckBox" />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
                     </div>
                     <div id="changeDeliverables" class="hidden">
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
@@ -292,26 +305,6 @@
                                     onclick="disableEnableElement(['deliverables-photos-Id'])" />
                                 <span class="slider round"></span>
                             </label>
-                        </div>
-                        <div id="changeAlbumDelSec">
-                            <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                                <label class="switch">
-                                    <input title="Add Albums ?" type="checkbox" id="display-albums-CheckBoxId"
-                                        name="display-albums-CheckBox"
-                                        onclick="disableEnableElement(['change-albums-CheckBoxId'])" />
-                                    <span class="slider round"></span>
-                                </label>
-                                <label> Albums </label>
-                                <textarea rows="2" cols="50" title="albums" id="deliverables-albums-Id" disabled
-                                    required>Two premium Designer Albums 150-200 images in each album (40 sheets per album)  </textarea>
-                                <label> Change Albums ? </label>
-                                <label class="switch">
-                                    <input title="Change albums" type="checkbox" id="change-albums-CheckBoxId"
-                                        name="change-albums-CheckBox"
-                                        onclick="disableEnableElement(['deliverables-albums-Id'])" />
-                                    <span class="slider round"></span>
-                                </label>
-                            </div>
                         </div>
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
                             <label class="switch">
@@ -366,6 +359,26 @@
                                     onclick="disableEnableElement(['deliverables-rawData-Id'])" />
                                 <span class="slider round"></span>
                             </label>
+                        </div>
+                        <div id="changeAlbumDelSec">
+                            <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
+                                <label class="switch">
+                                    <input title="Add Albums ?" type="checkbox" id="display-albums-CheckBoxId"
+                                        name="display-albums-CheckBox"
+                                        onclick="disableEnableElement(['change-albums-CheckBoxId'])" />
+                                    <span class="slider round"></span>
+                                </label>
+                                <label> Albums </label>
+                                <textarea rows="2" cols="50" title="albums" id="deliverables-albums-Id" disabled
+                                    required>Two premium Designer Albums 150-200 images in each album (40 sheets per album)  </textarea>
+                                <label> Change Albums ? </label>
+                                <label class="switch">
+                                    <input title="Change albums" type="checkbox" id="change-albums-CheckBoxId"
+                                        name="change-albums-CheckBox"
+                                        onclick="disableEnableElement(['deliverables-albums-Id'])" />
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
                         </div>
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
                             <label class="switch">
