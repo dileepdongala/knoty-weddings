@@ -1,133 +1,133 @@
 
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: rgb(74, 83, 84);
-  }
-  
-  header {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    background-color:  rgb(74, 83, 84);
-    color: white;
-  }
-  
-  button {
-    padding: 10px 15px;
-    border: none;
-    background-color: #b37400;
-    color: white;
-    cursor: pointer;
-    border-radius: 15px;
-    margin: 10px;
-    width: fit-content;
-    font-family: cursive;
-  }
-  
-  button:hover {
-    background-color: #003d80;
-  }
-  
-  .hidden {
-    display: none;
-  }
-  
-  #quotationTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-  }
-  
-  #quotationTable th, #quotationTable td {
-    border: 1px solid #7a7a7a;
-    padding: 5px;
-    text-align: left;
-    color : rgb(209, 237, 57);
-    font-family: cursive;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 20px;
-    background-color:  rgb(74, 83, 84);
-    border: 5px solid #5b4949;
-    margin: 20px;
-  }
-  
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    color: rgb(249, 203, 156);
-    margin: 5px;
-    justify-content: center;
-    font-family: cursive;
-  }
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(74, 83, 84);
+}
 
-  a,h2,h3 {
-    color : rgb(170, 199, 42);
-    font-family: cursive;
-  }
-  
-  #addEventBtn {
-    align-self: flex-start;
-  }
+header {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background-color:  rgb(74, 83, 84);
+  color: white;
+}
 
-  input,textarea {
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    width : min-content;
-    background-color: #868c8c;
-    border: darkslategray;
-  }
+button {
+  padding: 10px 15px;
+  border: none;
+  background-color: #b37400;
+  color: white;
+  cursor: pointer;
+  border-radius: 15px;
+  margin: 10px;
+  width: fit-content;
+  font-family: fangsong;
+}
 
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 34px;
-    height: 20px;
+button:hover {
+  background-color: #003d80;
+}
+
+.hidden {
+  display: none;
+}
+
+#quotationTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+#quotationTable th, #quotationTable td {
+  border: 1px solid #7a7a7a;
+  padding: 5px;
+  text-align: left;
+  color : rgb(209, 237, 57);
+  font-family: fangsong;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background-color:  rgb(74, 83, 84);
+  border: 5px solid #5b4949;
+  margin: 20px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: rgb(249, 203, 156);
+  margin: 5px;
+  justify-content: center;
+  font-family: fangsong;
+}
+
+a,h2,h3 {
+  color : rgb(170, 199, 42);
+  font-family: fangsong;
+}
+
+#addEventBtn {
+  align-self: flex-start;
+}
+
+input,textarea {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  width : min-content;
+  background-color: #868c8c;
+  border: darkslategray;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 20px;
 }
 .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 20px;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 20px;
 }
 .slider:before {
-    position: absolute;
-    content: "";
-    height: 14px;
-    width: 14px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
 }
 input:checked + .slider {
-    background-color: #4CAF50;
+  background-color: #4CAF50;
 }
 input:checked + .slider:before {
-    transform: translateX(14px);
+  transform: translateX(14px);
 }
 .error {
-  color: red;
-  font-size: 0.9em;
-  margin-top: 4px;
+color: red;
+font-size: 0.9em;
+margin-top: 4px;
 }
 .invalid {
-  border-color: red;
+border-color: red;
 }  
