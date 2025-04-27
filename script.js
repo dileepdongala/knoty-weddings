@@ -560,8 +560,9 @@ async function sendWhatsAppMessage(number, docId) {
   alert("Proposal sent successfully! ");
   fetchQuotations();
   document.getElementById("quotationTable").classList.toggle("hidden");
+  const quotation = await getDocumentData(QUOTATION_COLL, docId)
   const data = await getDocumentData(SEEDED_DATA_COLL, WHATSAPP_MESSAGE_ID)
-  let message = data.Whatsapp_message + "\n " + hostUrl + documentUrl;
+  let message = data.Whatsapp_message + "\n " + hostUrl + quotation.url;
   let whatsappUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(message)}`;
 
   window.open(whatsappUrl, "_blank");
@@ -1043,7 +1044,6 @@ async function saveGreetings() {
     };
     //await deleteDoc(quotationCollectionRef); // Deletes the document
     await updateDoc(docRef, updatedData);
-    console.log("Greetings updated successfully!");
     fetchQuotations();
   } catch (error) {
     alert("Error in Greetings updating:", error);
@@ -1056,6 +1056,17 @@ function disableEnableElement(idArr) {
   idArr.forEach(item => {
     document.getElementById(item).disabled = !document.getElementById(item).disabled;
   })
+}
+
+window.changeDeliverablesElement = changeDeliverablesElement;
+
+function changeDeliverablesElement(checkbox, textbox) {
+  disableEnableElement([checkbox]);
+  let checkoxVal = document.getElementById(checkbox).disabled;
+  if(checkoxVal){
+    document.getElementById(textbox).disabled = checkoxVal;
+    document.getElementById(checkbox).checked = !checkoxVal;
+  }
 }
 
 async function validateTitle(customerName) {
