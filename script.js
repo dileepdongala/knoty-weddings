@@ -147,8 +147,7 @@ async function addQuotation(quotation, deliverablesObj) {
     quotationData.display_del_raw_data = deliverablesObj.disPlayDelRawData;
     quotationData.display_del_long_videos = deliverablesObj.disPlayDelLongVideos;
     quotationData.display_del_photos = deliverablesObj.disPlayDelPhotos;
-    if (!quotation.Albums_Addon)
-      quotationData.display_del_albums = deliverablesObj.disPlayDelAlbums;
+    quotationData.display_del_albums = deliverablesObj.disPlayDelAlbums;
     quotationData.display_del_films = deliverablesObj.disPlayDelFilms;
     quotationData.display_del_reels = deliverablesObj.disPlayDelReels;
 
@@ -161,7 +160,7 @@ async function addQuotation(quotation, deliverablesObj) {
     if (deliverablesObj.disPlayDelPhotos && deliverablesObj.changeDelPhotos) {
       quotationData.del_photos = deliverablesObj.updatedDelPhotos;
     }
-    if (!quotation.Albums_Addon && deliverablesObj.disPlayDelAlbums && deliverablesObj.changeDelAlbums) {
+    if (deliverablesObj.disPlayDelAlbums && deliverablesObj.changeDelAlbums) {
       quotationData.del_albums = deliverablesObj.updatedDelAlbums;
     }
     if (deliverablesObj.disPlayDelFilms && deliverablesObj.changeDelFilms) {
