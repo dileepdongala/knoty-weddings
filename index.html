@@ -80,7 +80,11 @@
                     <h2>📋 Event Details</h2>
                     <div id="eventSection">
                         <div id="Event-1" class="event">
-                            <h3>Event 1</h3>
+                            <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
+                                <h3>Event</h3>
+                                <i class="fa fa-trash-o" title="Remove Latest Event"
+                                    style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeSelectedEvent(1)"></i>
+                            </div>
                             <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px ">
                                 <div style="display: flex; flex-direction: row;">
                                     <label for="eventName">Event Name : </label>
@@ -153,8 +157,8 @@
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
                         <button type="button" id="addEvent">+ Add Another Event</button>
-                        <i class="fa fa-trash-o" title="Remove Latest Event"
-                            style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeEvent()"></i>
+                        <!-- <i class="fa fa-trash-o" title="Remove Latest Event"
+                            style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeEvent()"></i> -->
                     </div>
                 </section>
                 <section>
@@ -260,7 +264,7 @@
                             <span class="slider round"></span>
                         </label>
                         <label for="webLiveCharges">💲 Charges : ₹ </label>
-                        <input type="text" title="Charges" id="webLiveId" name="webLiveCharges" value="15,000" disabled
+                        <input type="text" title="Charges" id="webLiveId" name="webLiveCharges" value="20,000" disabled
                             required />
                         <label>per session </label>
                         <input type="number" title="Web Live Time" id="webLiveTimeId" name="webLiveTime" value="5"
@@ -274,11 +278,12 @@
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
                         <div style="display: flex; flex-direction: column; flex-wrap: wrap; margin: 20px; gap:10px">
                             <label>1. 1000 Handpicked & Edited images in Cloud (delivered in 20 days )</label>
-                            <label>2. A cinematic Film of 3-5 mins with best footages from all the events in cloud
+                            <label>2. Two premium Designer Albums 150-200 images in each album (40 sheets per album) </label>
+                            <label>3. A cinematic Film of 3-5 mins with best footages from all the events in cloud
                                 (delivered in 60 days ) </label>
-                            <label>3. Full Length Documented long videos for all the events in hard drives (delivered in
+                            <label>4. Full Length Documented long videos for all the events in hard drives (delivered in
                                 60 days ) </label>
-                            <label>4. All Raw data, Edited photos & videos in Hard drives </label>
+                            <label>5. All Raw data, Edited photos & videos in Hard drives </label>
                             <h2>Change Default Deliverables ?</h2>
                             <label class="switch">
                                 <input title="Change Default Deliverables ?" type="checkbox"
@@ -364,7 +369,7 @@
                             <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
                                 <label class="switch">
                                     <input title="Add Albums ?" type="checkbox" id="display-albums-CheckBoxId"
-                                        name="display-albums-CheckBox"
+                                        name="display-albums-CheckBox" checked
                                         onclick="changeDeliverablesElement('change-albums-CheckBoxId', 'deliverables-albums-Id')" />
                                     <span class="slider round"></span>
                                 </label>
