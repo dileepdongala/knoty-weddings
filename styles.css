@@ -3,14 +3,14 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: rgb(74, 83, 84);
+  background-color: rgb(241 183 126);
 }
 
 header {
   display: flex;
   gap: 10px;
   padding: 10px;
-  background-color:  rgb(74, 83, 84);
+  background-color:  rgb(241 183 126);
   color: white;
 }
 
@@ -41,10 +41,10 @@ button:hover {
 }
 
 #quotationTable th, #quotationTable td {
-  border: 1px solid #7a7a7a;
-  padding: 5px;
+  border: 1px solid #d81e1e;
+  padding: 10px;
   text-align: left;
-  color : rgb(209, 237, 57);
+  color : rgb(0, 0, 0);
   font-family: fangsong;
 }
 
@@ -53,7 +53,7 @@ form {
   flex-direction: column;
   gap: 10px;
   padding: 20px;
-  background-color:  rgb(74, 83, 84);
+  background-color:  rgb(241 183 126);
   border: 5px solid #5b4949;
   margin: 20px;
 }
@@ -62,14 +62,14 @@ label {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  color: rgb(249, 203, 156);
+  color: rgb(0, 0, 0);
   margin: 5px;
   justify-content: center;
   font-family: fangsong;
 }
 
 a,h2,h3 {
-  color : rgb(170, 199, 42);
+  color : rgb(0, 0, 0);
   font-family: fangsong;
 }
 
@@ -80,8 +80,13 @@ a,h2,h3 {
 input,textarea {
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   width : min-content;
-  background-color: #868c8c;
+  background-color: #d1dddd;
   border: darkslategray;
+  border-radius: 10px;
+  padding:5px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 1px;
 }
 
 .switch {
