@@ -292,7 +292,11 @@ function addEventsForEdit(eventData, eCnt) {
   newEvent.setAttribute("id", "Event-" + eCnt);
   newEvent.classList.add('event');
   let eventDateType = (eventDateVal == 'TBD') ? "text" : "date";
-  newEvent.innerHTML = `<h3>Event ${eCnt}</h3>
+  newEvent.innerHTML = `<div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
+                                <h3>Event</h3>
+                                <i class="fa fa-trash-o" title="Remove Current Event"
+                                    style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeSelectedEvent(${eCnt})"></i>
+                            </div>
                           <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
                             <div style="display: flex; flex-direction: row; ">
                                 <label for="eventName">Event Name : </label>
@@ -540,6 +544,7 @@ export function toggleInput(checkbox, eventNum) {
 window.toggleInput = toggleInput;
 window.sendWhatsAppMessage = sendWhatsAppMessage;
 window.removeEvent = removeEvent;
+window.removeSelectedEvent = removeSelectedEvent;
 window.hideElement = hideElement;
 
 function hideElement(valueId, hideId) {
@@ -575,7 +580,11 @@ function addEvent() {
   newEvent.setAttribute("id", "Event-" + eventsCount);
   const firstEventDate = document.getElementById(lastEventDateId).value;
   newEvent.classList.add('event');
-  newEvent.innerHTML = `<h3>Event ${eventsCount}</h3>
+  newEvent.innerHTML = ` <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
+                                <h3>Event</h3>
+                                <i class="fa fa-trash-o" title="Remove Current Event"
+                                    style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeSelectedEvent(${eventsCount})"></i>
+                            </div>
                           <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
                             <div style="display: flex; flex-direction: row; ">
                                 <label for="eventName">Event Name : </label>
@@ -650,6 +659,18 @@ function removeEvent() {
     eventSection.removeChild(child);
     eventsCount -= 1;
   }
+}
+
+function removeSelectedEvent(eventNo) {
+  const isConfirmed = confirm("Are you sure you want to delete current Event ?");
+    if (isConfirmed) {
+      if (eventsCount > 1) {
+        const eventSection = document.getElementById('eventSection');
+        var child = document.getElementById("Event-" + eventNo);
+        eventSection.removeChild(child);
+        eventsCount -= 1;
+      }
+    }
 }
 
 function clearDataForNewProposal() {
