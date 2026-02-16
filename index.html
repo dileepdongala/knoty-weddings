@@ -9,7 +9,10 @@
     <link rel="icon" href="favicon.jpeg" type="image/x-icon">
     <link rel="apple-touch-icon" href="favicon.jpeg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
 </head>
 
 <body>
@@ -23,8 +26,9 @@
     </header>
     <div class="container">
         <div class="buttons">
+            <button id="darkModeToggle">🌙 Dark Mode</button>
             <button id="createQuotation">New Proposal</button>
-            <button id="fetchQuotations">Poposals</button>
+            <button id="fetchQuotations">Proposals</button>
             <button id="editDeliverables" hidden>✓ Deliverables</button>
             <button id="editTermsAndConditions">📑 Terms And Conditions</button>
             <button id="editGreetings">🤝 Greetings</button>
@@ -38,39 +42,42 @@
                     <th>Mobile</th>
                     <th>Share</th>
                     <th>Status</th>
-                    <th>Action</th>
                     <th>Validity Date</th>
-                    <th>Reject</th>
-                    <th>Accept</th>
-                    <th>Delete</th>
-                    <th>Creation Date</th>
-                    <th>Edit</th>
-                    <th>Document Id</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
+        <div id="paginationContainer" class="pagination-container hidden">
+            <button id="prevPage" class="pagination-btn">← Previous</button>
+            <span id="pageInfo" class="page-info">Page 1</span>
+            <button id="nextPage" class="pagination-btn">Next →</button>
+        </div>
         <div id="formContainer" class="hidden">
             <h3 id="formTitle">New Proposal</h3>
             <form id="quotationForm">
                 <section>
                     <h2>Client Details</h2>
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px;  gap:20px">
-                        <div style="display: flex; flex-direction: row;">
+                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap: 20px;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
                             <label for="title">Title : </label>
                             <input type="text" id="title" required />
                             <div id="titleError" class="error"></div>
                         </div>
-                        <div style="display: flex; flex-direction: row; ">
-                            <label for="mobile">Mobile : </label>+<span>&nbsp;</span>
-                            <input type="text" id="mobile" required />
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <label for="mobile">Mobile : </label>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span>+91</span>
+                                <input type="number" id="mobile" placeholder="10 digit number" inputmode="numeric" min="0" max="9999999999" required />
+                            </div>
                         </div>
                         <div style="display: flex; flex-direction: row; ">
                             <input type="text" id="editDocumentId" hidden />
                         </div>
                         <div id="editValidUpToIdDiv" class="hidden">
-                            <div id="validityId" style="display: flex; flex-direction: row; ">
-                                <label for="mobile">Valid Up to (Edit purpose) : </label>
+                            <div id="validityId" style="display: flex; flex-direction: column; gap: 5px;">
+                                <label for="editValidUpToId">Valid Up to (Edit purpose) : </label>
                                 <input type="text" id="editValidUpToId" disabled />
                             </div>
                         </div>
@@ -86,92 +93,76 @@
                                     style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeSelectedEvent(1)"></i>
                             </div>
                             <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px ">
-                                <div style="display: flex; flex-direction: row;">
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
                                     <label for="eventName">Event Name : </label>
                                     <input type="text" id="eventNameId-1" name="eventName" required />
                                 </div>
-                                <div style="display: flex; flex-direction: row; ">
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
                                     <label for="eventLocation">📍 Location : </label>
                                     <input type="text" id="eventLocationId-1" name="eventLocation" required>
-                                    <span>&nbsp;</span>
-                                    <span>&nbsp;</span>
-                                    <span>&nbsp;</span>
-                                    <br><br>
                                     <label for="eventLocationTBD">
                                         <input id="eventLocationTBD-1" name="eventLocationTBD" type="checkbox"
-                                            onclick="toggleInput(this,1)">TBD</input>
+                                            onclick="toggleInput(this,1)"> TBD
                                     </label>
                                 </div>
-                                <div style="display: flex; flex-direction: row; ">
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
                                     <label for="eventDate">📆 Date : </label>
                                     <input id="eventDateId-1" type="date" name="eventDate" required />
-                                    <span>&nbsp;</span>
-                                    <span>&nbsp;</span>
-                                    <span>&nbsp;</span>
-                                    <br><br>
                                     <label for="eventDateTBD">
                                         <input id="eventDateTBD-1" name="eventDateTBD" type="checkbox" value="off"
-                                            onclick="toggleInput(this,1)">TBD</input>
+                                            onclick="toggleInput(this,1)"> TBD
                                     </label>
                                 </div>
-                                <div style="display: flex; flex-direction: row;">
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
                                     <label for="eventDetails">Details : </label>
                                     <textarea id="eventDetails-1" rows="3" cols="30" name="eventDetails"></textarea>
                                 </div>
                             </div>
                             <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px;  gap:20px">
-                                <div style="display: flex; flex-direction: row;">
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
                                     <label for="cinematographers">🎥 Cinematographers : </label>
                                     <input id="cinematographers-1" type="number" name="cinematographers" min="0"
                                         value="1" required />
                                 </div>
-                                <div style="display: flex; flex-direction: row;">
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
                                     <label for="candidPhotographers">📷 Candid Photographers : </label>
                                     <input id="candidPhotographers-1" type="number" name="candidPhotographers" min="0"
                                         value="1" required />
                                 </div>
                             </div>
                             <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; gap:20px">
-                                <div style="display: flex; flex-direction: row;">
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
                                     <label for="traditionalVideographers">📹 Traditional Videographers : </label>
                                     <input id="traditionalVideographers-1" type="number" name="traditionalVideographers"
                                         min="0" value="1" required />
                                 </div>
-                                <div style="display: flex; flex-direction: row;">
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
                                     <label for="traditionalPhotographers">📸 Traditional Photographers : </label>
                                     <input id="traditionalPhotographers-1" type="number" name="traditionalPhotographers"
                                         min="0" value="1" required />
                                 </div>
                             </div>
-                            <!-- <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
-                            <div style="display: flex; flex-direction: row; width:50%">
-                                <label for="videographers">🎥 Videographers : </label>
-                                <input type="number" name="videographers" min="0" value="1" required>
-                            </div>
-                            <div style="display: flex; flex-direction: row; width:50%">
-                                <label for="photographers">📷 Photographers : </label>
-                                <input type="number" name="photographers" min="0" value="1" required>
-                            </div>
-                        </div> -->
                         </div>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
                         <button type="button" id="addEvent">+ Add Another Event</button>
-                        <!-- <i class="fa fa-trash-o" title="Remove Latest Event"
-                            style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeEvent()"></i> -->
                     </div>
                 </section>
                 <section>
                     <h2>💵 Charges</h2>
-                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
-                        <label for="price">Total Cost (excluding GST) : </label>
-                        <input style="width:20%; height: 30px;" type="number" id="price" min="0" value="400000"
-                            required />
-                        <label> Add GST ? </label>
-                        <label class="switch">
-                            <input type="checkbox" id="addGST" name="addGST" checked />
-                            <span class="slider round"></span>
-                        </label>
+                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px; align-items: flex-start;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <label for="price">Total Cost (excluding GST) : </label>
+                            <input style="width: auto; min-width: 140px;" type="number" id="price" min="0" value="400000"
+                                required />
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 5px; justify-content: flex-end;">
+                            <label> Add GST ? </label>
+                            <label class="switch">
+                                <input type="checkbox" id="addGST" name="addGST" checked />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
                     </div>
                 </section>
                 <section>
@@ -379,7 +370,7 @@
                                 <label> Change Albums ? </label>
                                 <label class="switch">
                                     <input title="Change albums" type="checkbox" id="change-albums-CheckBoxId"
-                                        name="change-albums-CheckBox" disabled
+                                        name="change-albums-CheckBox"
                                         onclick="disableEnableElement(['deliverables-albums-Id'])" />
                                     <span class="slider round"></span>
                                 </label>
@@ -406,47 +397,48 @@
                     </div>
                 </section>
 
-                <button type="submit">Create</button>
+                <button type="submit" id="submitBtn">Create</button>
             </form>
         </div>
         <div id="termsAndConditionsSection" class="hidden">
             <form id="termsAndConditionsForm">
-                <label style="margin:20px;">Terms and Conditions : </label>
-                <div id="editTermsAndConditionsSection">
+                <h2 style="margin:20px;">Terms and Conditions</h2>
+                <div id="editTermsAndConditionsSection" style="padding: 0 20px;">
                 </div>
-                <div style="display: flex; flex-direction: row; ">
-                    <button id="addNewTermsBtn" style="width:10%" type="button">+ Add New Terms</button>
-                    <button style="width:10%; " type="submit">Save changes</button>
+                <div style="display: flex; flex-direction: row; gap: 12px; margin: 20px;">
+                    <button id="addNewTermsBtn" type="button">+ Add New Terms</button>
+                    <button type="submit">Save changes</button>
                 </div>
             </form>
         </div>
         <div id="deliverablesSection" class="hidden">
             <form id="deliverablesForm">
-                <label style="margin:20px;">Deliverables : </label>
-                <div id="editDeliverablesSection">
+                <h2 style="margin:20px;">Deliverables</h2>
+                <div id="editDeliverablesSection" style="padding: 0 20px;">
                 </div>
-                <label style=" width : 100%; color:red; font-weight: bolder;">Note : Add both Heading and detail in same
-                    field. Seperate Heading (first) and detail (second) with ::: </label>
-                <div style="display: flex; flex-direction: row; ">
-                    <button id="addNewDeliverablesBtn" style="width:10%" type="button">+ Add New Deliverables</button>
+                <label style="width: 100%; color:red; font-weight: bolder; padding: 0 20px; margin: 20px 0;">Note : Add both Heading and detail in same field. Separate Heading (first) and detail (second) with ::: </label>
+                <div style="display: flex; flex-direction: row; gap: 12px; margin: 20px; flex-wrap: wrap;">
+                    <button id="addNewDeliverablesBtn" type="button">+ Add New Deliverables</button>
                     <button type="submit">Save changes</button>
                 </div>
             </form>
         </div>
         <div id="greetingsSection" class="hidden">
             <form id="greetingsForm">
-                <label style="margin:20px;">Greetings : </label>
-                <div id="editGreetingsSection">
+                <h2 style="margin:20px;">Greetings</h2>
+                <div id="editGreetingsSection" style="padding: 0 20px;">
                 </div>
-                <div style="display: flex; flex-direction: row; ">
-                    <button id="addNewGreetingsBtn" style="width:10%" type="button">+ Add New Greetings</button>
-                    <button style="width:10%; " type="submit">Save changes</button>
+                <div style="display: flex; flex-direction: row; gap: 12px; margin: 20px; flex-wrap: wrap;">
+                    <button id="addNewGreetingsBtn" type="button">+ Add New Greetings</button>
+                    <button type="submit">Save changes</button>
                 </div>
             </form>
         </div>
     </div>
     <script type="module" src="./script.js">
     </script>
+    <div id="toast"></div>
+
 </body>
 
 </html>

@@ -4,11 +4,8 @@ import { getFirestore, collection, getDocs, doc, addDoc, updateDoc, getDoc, dele
 const QUOTATION_COLL = "Quotations";
 const SEEDED_DATA_COLL = "Seeded_Data";
 const GREETINGS_DOC_ID = "Greetings_Doc";
-const COMPLIMENTARY_DOC_ID = "Complimentary_Doc";
 const DELIVERABLES_DOC_ID = "Deliverables";
-const EXTRA_REQUIREMENTS_DOC_ID = "Extra_Requirements_Doc";
 const TERMS_AND_CONDITIONS_DOC_ID = "Terms_And_Conditions_Doc";
-const CHARGES_DOC_ID = "Charges_Doc";
 const WHATSAPP_MESSAGE_ID = "Whatsapp_message";
 const QUOTATION_HOST = "Quotation_Host";
 let db;
@@ -23,6 +20,10 @@ let createInProgress = false;
 let editInProgress = false;
 let oldTitleInEdit;
 
+// Pagination variables
+let allQuotations = [];
+let currentPage = 1;
+const itemsPerPage = 15;
 
 // Initialize fireBase
 function initDB() {
@@ -35,37 +36,6 @@ function initDB() {
     messagingSenderId: "295918037477",
     appId: "1:295918037477:web:eb751a64d1a81094ee670c"
   };
-
-  /*const firebaseConfig = {
-    apiKey: "AIzaSyCvN9QjWH0-XVdScuB0lsWszBGdwWdOskA",
-    authDomain: "knoty-weddings-app.firebaseapp.com",
-    projectId: "knoty-weddings-app",
-    storageBucket: "knoty-weddings-app.firebasestorage.app",
-    messagingSenderId: "900573899497",
-    appId: "1:900573899497:web:4ec43e4249224e67d2de78",
-    measurementId: "G-8Y46SQ6F3F"
-  };*/
-
-  /*const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.FIREBASE_APP_ID
-  };*/
-
-  /* const firebaseConfig = {
-    apiKey: "AIzaSyDtFmFbzffrijSB6t9G7hYsmmjH1vPR0jU",
-    authDomain: "
-    -ea039.firebaseapp.com",
-    databaseURL: "https://kwphotography-ea039-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "kwphotography-ea039",
-    storageBucket: "kwphotography-ea039.firebasestorage.app",
-    messagingSenderId: "643669622642",
-    appId: "1:643669622642:web:af4d25f389a501629fa7eb",
-    measurementId: "G-3MFN4VCXMM"
-  };*/
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
@@ -94,7 +64,7 @@ async function addQuotation(quotation, deliverablesObj) {
   const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}`;
 
   const today = new Date();
-  today.setDate(today.getDate() + 7);
+  today.setDate(today.getDate() + 14); // Changed from 7 to 14 days
   // Format the date as dd-MMM-yyyy
   const options = { day: '2-digit', month: 'short', year: 'numeric' };
   let formatedToday = today.toLocaleDateString('en-US', options).replace(',', '');
@@ -188,7 +158,7 @@ async function addQuotation(quotation, deliverablesObj) {
     // Open the quotation in a new tab
     window.open(hostUrl + documentUrl, "_blank");
   } catch (error) {
-    alert("Error adding document:", error);
+    showToast("Error adding document: "+ error, "error");
   }
   const docRef = doc(db, QUOTATION_COLL, documentId);
 
@@ -207,83 +177,197 @@ async function addQuotation(quotation, deliverablesObj) {
 }
 
 function sortTableByDate() {
-  let table = document.getElementById("quotationTable");
-  let rows = Array.from(table.rows).slice(1); // Get all rows except header
+  allQuotations.sort((a, b) => {
+    let dateA = a.created_date;
+    let dateB = b.created_date;
 
-  rows.sort((rowA, rowB) => {
-    let dateA = rowA.cells[11].textContent.trim();
-    let dateB = rowB.cells[11].textContent.trim();
-
-    // Convert "dd-mm-yyyy hh:mm" to "yyyy-mm-dd hh:mm" for comparison
+    // Convert "dd-mm-yyyy hh:mm" to Date object for comparison
     let timestampA = new Date(dateA.split(" ")[0].split("-").reverse().join("-") + "T" + dateA.split(" ")[1]);
     let timestampB = new Date(dateB.split(" ")[0].split("-").reverse().join("-") + "T" + dateB.split(" ")[1]);
 
-    return timestampB - timestampA; // Descending order
+    return timestampB - timestampA; // Descending order (latest first)
   });
+}
+
+function renderPage() {
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageData = allQuotations.slice(start, end);
+
   const tableBody = document.querySelector("#quotationTable tbody");
   tableBody.innerHTML = "";
-  // Append sorted rows back to table
-  for (let row of rows) {
+
+  pageData.forEach((quotation) => {
+    const row = document.createElement("tr");
+    let completeUrl = hostUrl + `${quotation.url}`
+    documentUrl = quotation.url;
+    
+    // Determine status icon and color
+    let statusDisplay = '🧼 Draft';
+    let statusClass = 'status-draft';
+    
+    if (quotation.status == "Expired") {
+      statusDisplay = '🔶 Expired';
+      statusClass = 'status-expired';
+    } else if (quotation.status == "Sent") {
+      statusDisplay = '🔷 Sent';
+      statusClass = 'status-sent';
+    } else if (quotation.status == "Accepted") {
+      statusDisplay = '✅ Accepted';
+      statusClass = 'status-accepted';
+    } else if (quotation.status == "Rejected") {
+      statusDisplay = '🔴 Rejected';
+      statusClass = 'status-rejected';
+    }
+    
+    // Build actions menu
+    let actionButtons = '';
+    const docId = quotation.id;
+    if (quotation.status == "Expired") {
+      actionButtons = `
+        <button class="action-btn" value="${docId}" id="activateQuotation-${docId}" style="color: var(--primary);">Activate</button>
+      `;
+    } else if (quotation.status == "Sent" || quotation.status == "Accepted" || quotation.status == "Rejected" || quotation.status == "Draft") {
+      actionButtons = `
+        <button class="action-btn" value="${docId}" id="editProposal-${docId}" style="color: var(--primary);">Edit</button>
+        <button class="action-btn success" value="${docId}" id="acceptQuotation-${docId}">Accept</button>
+        <button class="action-btn danger" value="${docId}" id="rejectQuotation-${docId}">Reject</button>
+        <button class="action-btn danger" value="${docId}" id="expireQuotation-${docId}">Expire</button>
+        <button class="action-btn danger" value="${docId}" id="deleteQuotation-${docId}">Delete</button>
+      `;
+    }
+    
+    let quoteHTML = `
+        <td data-label="Title">${quotation.title}</td>
+        <td data-label="Price">₹${quotation.price}/-</td>
+        <td data-label="Quotation"><a href="${completeUrl}" target="_blank">Open</a></td>
+        <td data-label="Mobile">+${quotation.mobile}</td>
+        <td data-label="Share"><i onclick="sendWhatsAppMessage(${quotation.mobile},'${docId}')" class="fa fa-whatsapp" style="cursor: pointer;font-size:24px;"></i></td>
+        <td data-label="Status"><span class="${statusClass}">${statusDisplay}</span></td>
+        <td data-label="Validity">${quotation.validUpTo}</td>
+        <td data-label="Created">${quotation.created_date}</td>
+        <td data-label="Actions">
+          <div class="action-menu-container">
+            <button class="action-menu-btn" onclick="toggleActionMenu(event)">⋮</button>
+            <div class="action-menu-dropdown">
+              ${actionButtons}
+            </div>
+          </div>
+        </td>
+      `;
+    
+    row.innerHTML = quoteHTML;
     tableBody.appendChild(row);
+  });
+
+  // Update pagination info
+  const totalPages = Math.ceil(allQuotations.length / itemsPerPage);
+  document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages}`;
+  document.getElementById("prevPage").disabled = currentPage === 1;
+  document.getElementById("nextPage").disabled = currentPage === totalPages;
+
+  // Show/hide pagination
+  if (totalPages > 1) {
+    document.getElementById("paginationContainer").classList.remove("hidden");
+  } else {
+    document.getElementById("paginationContainer").classList.add("hidden");
   }
 }
 
 // Fetch quotations from fireBase
 async function fetchQuotations() {
   document.getElementById("formContainer").classList.add("hidden");
-  document.getElementById("quotationTable").classList.toggle("hidden");
+  document.getElementById("quotationTable").classList.remove("hidden");
+  document.getElementById("quotationTable").classList.add("active-table");
+  document.getElementById("paginationContainer").classList.remove("hidden");
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
   document.getElementById("greetingsSection").classList.add("hidden");
   const quotationCollectionRef = collection(db, QUOTATION_COLL); // Reference to the 'Quotations' collection
   try {
     const querySnapshot = await getDocs(quotationCollectionRef);
-    const tableBody = document.querySelector("#quotationTable tbody");
-    tableBody.innerHTML = "";
+    allQuotations = [];
     querySnapshot.forEach((doc) => {
-      const quotation = doc.data();
-      const row = document.createElement("tr");
-      let completeUrl = hostUrl + `${quotation.url}`
-      documentUrl = quotation.url;
-      let quoteHTML = `
-          <td>${quotation.title}</td>
-          <td>₹${quotation.price}/-</td>
-          <td><a href="${completeUrl}" target="_blank">Open</a></td>
-          <td>+${quotation.mobile}</td>
-          <td> <i onclick="sendWhatsAppMessage(${quotation.mobile},'${doc.id}')" class="fa fa-whatsapp" style="cursor: pointer;font-size:40px;"></i></td>`
-      if (quotation.status == "Expired") {
-        quoteHTML += `<td>🔶 Expired</td>
-        <td><button value="${doc.id}" id="activateQuotation-${doc.id}">Activate</button></td>`
-      } else if (quotation.status == "Sent") {
-        quoteHTML += `<td>🔷 Sent </td>
-        <td><button value="${doc.id}" id="expireQuotation-${doc.id}">Expire</button></td>`
-      } else if (quotation.status == "Accepted") {
-        quoteHTML += `<td >✅ Accepted </td>
-        <td><button value="${doc.id}" id="expireQuotation-${doc.id}">Expire</button></td>`
-      } else if (quotation.status == "Rejected") {
-        quoteHTML += `<td >🔴 Rejected </td>
-        <td><button value="${doc.id}" id="expireQuotation-${doc.id}">Expire</button></td>`
-      } else {
-        quoteHTML += `<td >🧼 Draft </td>
-        <td><button value="${doc.id}" id="expireQuotation-${doc.id}">Expire</button></td>`
-      }
-      quoteHTML += ` <td>${quotation.validUpTo}</td>
-      <td><button style="background-color:#b30000" value="${doc.id}" id="rejectQuotation-${doc.id}">Reject</button></td>
-      <td><button style="background-color:#00b369" value="${doc.id}" id="acceptQuotation-${doc.id}">Accept</button></td>
-      <td><button style="background-color:#db1b1b" value="${doc.id}" id="deleteQuotation-${doc.id}">Delete</button>
-      <td>${quotation.created_date}</td>
-      <td><button style="background-color:blue" value="${doc.id}" id="editProposal-${doc.id}">Edit</button></td>
-      <td>${doc.id}</td>`
-        ;
-      row.innerHTML = quoteHTML;
-      tableBody.appendChild(row);
+      allQuotations.push({ id: doc.id, ...doc.data() });
     });
     sortTableByDate();
+    currentPage = 1;
+    renderPage();
 
   } catch (error) {
-    alert("Error fetching Quotations:", error);
+    showToast("Error fetching Quotations: "+ error, "error");
   }
 }
+
+// Pagination button handlers
+document.getElementById("prevPage").addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    renderPage();
+  }
+});
+
+document.getElementById("nextPage").addEventListener("click", () => {
+  const totalPages = Math.ceil(allQuotations.length / itemsPerPage);
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderPage();
+  }
+});
+
+// Toggle action menu visibility
+function toggleActionMenu(event) {
+  event.stopPropagation();
+  const button = event.currentTarget;
+  const dropdown = button.nextElementSibling;
+  
+  // Close all other open menus
+  document.querySelectorAll('.action-menu-dropdown.active').forEach(menu => {
+    if (menu !== dropdown) {
+      menu.classList.remove('active');
+    }
+  });
+  
+  dropdown.classList.toggle('active');
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', function(event) {
+  if (!event.target.closest('.action-menu-container')) {
+    document.querySelectorAll('.action-menu-dropdown.active').forEach(menu => {
+      menu.classList.remove('active');
+    });
+  }
+});
+
+// Handle action button clicks
+document.addEventListener('click', function(event) {
+  if (event.target.classList.contains('action-btn') || event.target.closest('.action-btn')) {
+    const button = event.target.classList.contains('action-btn') ? event.target : event.target.closest('.action-btn');
+    const id = button.id;
+    const value = button.value;
+    
+    // Close the menu
+    document.querySelectorAll('.action-menu-dropdown.active').forEach(menu => {
+      menu.classList.remove('active');
+    });
+    
+    // Handle different action types
+    if (id.startsWith('expireQuotation')) {
+      updateQuotationStatus(value, "Expired");
+    } else if (id.startsWith('activateQuotation')) {
+      updateQuotationStatus(value, "Draft");
+    } else if (id.startsWith('rejectQuotation')) {
+      updateQuotationStatus(value, "Rejected");
+    } else if (id.startsWith('acceptQuotation')) {
+      updateQuotationStatus(value, "Accepted");
+    } else if (id.startsWith('deleteQuotation')) {
+      deleteQuotation(value);
+    } else if (id.startsWith('editProposal')) {
+      editProposal(value);
+    }
+  }
+});
 
 function addEventsForEdit(eventData, eCnt) {
   let eventDateVal = (eventData.date == 'TBD') ? `TBD` : `${eventData.date.split("-")[2]}-${eventData.date.split("-")[1]}-${eventData.date.split("-")[0]}`;
@@ -298,53 +382,45 @@ function addEventsForEdit(eventData, eCnt) {
                                     style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeSelectedEvent(${eCnt})"></i>
                             </div>
                           <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
-                            <div style="display: flex; flex-direction: row; ">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="eventName">Event Name : </label>
                                 <input type="text"  id="eventNameId-${eCnt}" name="eventName" required value="${eventData.name}">
                             </div>
-                            <div style="display: flex; flex-direction: row; ">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="eventLocation">📍 Location : </label>
                                 <input id="eventLocationId-${eCnt}" type="text" name="eventLocation" required value="${eventData.location}">
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span> 
-                                <br><br>
                                 <label for="eventLocationTBD"> TBD
                                     <input id="eventLocationTBD-${eCnt}" name="eventLocationTBD" type="checkbox" onclick="toggleInput(this,${eCnt})">
                                 </label>
                             </div>
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="eventDate">📆 Date : </label>
                                 <input id="eventDateId-${eCnt}" type=${eventDateType} name="eventDate" required value="${eventDateVal}">
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span> 
-                                <br><br>
                                 <label for="eventDateTBD"> TBD
                                     <input id="eventDateTBD-${eCnt}" name="eventDateTBD" type="checkbox"  onclick="toggleInput(this,${eCnt})">
                                 </label>
                             </div>
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="eventDetails">Details : </label>
                                 <textarea id="eventDetails-${eCnt}" rows="3" cols="30" name="eventDetails" value="${eventData.eventDetails}"></textarea>
                             </div>
                         </div>
                           <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px;  gap:20px">
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="cinematographers">🎥 Cinematographers : </label>
                                 <input id="cinematographers-${eCnt}" type="number" name="cinematographers" min="0" required value="${eventData.cinematographers}">
                             </div>
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="candidPhotographers">📷 Candid Photographers : </label>
                                 <input id="candidPhotographers-${eCnt}" type="number" name="candidPhotographers" min="0" required value="${eventData.candidPhotographers}">
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; gap:20px">
-                             <div style="display: flex; flex-direction: row;">
+                             <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="traditionalVideographers">📹 Traditional Videographers : </label>
                                 <input id="traditionalVideographers-${eCnt}" type="number" name="traditionalVideographers" min="0" required value="${eventData.traditionalVideographers}">
                             </div>
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="traditionalPhotographers">📸 Traditional Photographers : </label>
                                 <input id="traditionalPhotographers-${eCnt}" type="number" name="traditionalPhotographers" min="0" required value="${eventData.traditionalPhotographers}">
                             </div>
@@ -380,12 +456,14 @@ async function editProposal(docId) {
   createInProgress = false;
   editInProgress = true;
   document.getElementById("formTitle").textContent = "Edit Proposal";
+  document.getElementById("submitBtn").textContent = "Update";
   const quotationDocRef = doc(db, QUOTATION_COLL, docId); // Reference to the 'Quotations' collection and the specific document ID
   try {
     const docSnap = await getDoc(quotationDocRef); // Fetch the document snapshot
 
     if (docSnap.exists()) {
       document.getElementById("quotationTable").classList.add("hidden");
+      document.getElementById("quotationTable").classList.remove("active-table");
       document.getElementById("formContainer").classList.remove("hidden");
       const quotation = docSnap.data();
       oldTitleInEdit = quotation.title;
@@ -438,8 +516,12 @@ async function editProposal(docId) {
 
       document.getElementById("preWeddingPSReqCheckBoxId").checked = quotation.pwpsRequired;
       if (quotation.pwpsRequired) {
+        document.getElementById("changePWPSSectionDiv").classList.remove("hidden");
         document.getElementById("preWeddingShootCheckBoxId").checked = quotation.pwpsChange;
-        document.getElementById("preWeddingShootId").value = quotation.preWeddingPhotoShoot;
+        if (quotation.pwpsChange) {
+          document.getElementById("preWeddingShootId").value = quotation.preWeddingPhotoShoot;
+          document.getElementById("preWeddingShootId").disabled = false;
+        }
       }
 
       document.getElementById("dronesCheckBoxId").checked = quotation.droneRequired;
@@ -487,12 +569,11 @@ async function updateQuotationStatus(documentId, status) {
         ['status']: status, // Dynamically set the field to update
       };
       await updateDoc(docRef, updatedData);
-      alert("Proposal " + status + " successfully! Please update the status properly.");
+      showToast("Proposal " + status + " successfully! Please update the status properly.", "success");
       fetchQuotations();
-      document.getElementById("quotationTable").classList.toggle("hidden");
     }
   } catch (error) {
-    alert("Error in " + status + "  Proposal:", error);
+    showToast("Error in " + status + "  Proposal: "+ error, "error");
   }
 }
 
@@ -507,17 +588,16 @@ async function deleteQuotation(documentId) {
       const querySnapshot = await getDoc(docRef);
       let quotation = querySnapshot.data();
       if (quotation.status == "Accepted") {
-        alert("❗❗❗ Cannot delete Accepted proposal ❗❗❗ Please update the status and try again");
+        showToast("❗❗❗ Cannot delete Accepted proposal ❗❗❗ Please update the status and try again", "Warning");
       }
       else {
         await deleteDoc(docRef);
-        alert("Proposal deleted successfully!");
+        showToast("Proposal deleted successfully!", "Success");
         fetchQuotations();
-        document.getElementById("quotationTable").classList.toggle("hidden");
       }
     }
   } catch (error) {
-    alert("Error expiring Proposal:", error);
+    showToast("Error expiring Proposal: "+ error, "error");
   }
 }
 
@@ -543,6 +623,7 @@ export function toggleInput(checkbox, eventNum) {
 
 window.toggleInput = toggleInput;
 window.sendWhatsAppMessage = sendWhatsAppMessage;
+window.toggleActionMenu = toggleActionMenu;
 window.removeEvent = removeEvent;
 window.removeSelectedEvent = removeSelectedEvent;
 window.hideElement = hideElement;
@@ -561,9 +642,8 @@ async function sendWhatsAppMessage(number, docId) {
     ['status']: 'Sent', // Dynamically set the field to update
   };
   await updateDoc(docRef, updatedData);
-  alert("Proposal sent successfully! ");
+  showToast("Proposal sent successfully!", "Success");
   fetchQuotations();
-  document.getElementById("quotationTable").classList.toggle("hidden");
   const quotation = await getDocumentData(QUOTATION_COLL, docId)
   const data = await getDocumentData(SEEDED_DATA_COLL, WHATSAPP_MESSAGE_ID)
   let message = data.Whatsapp_message + "\n " + hostUrl + quotation.url;
@@ -586,67 +666,49 @@ function addEvent() {
                                     style="cursor: pointer;padding: 10px;font-size:30px;color:red" onclick="removeSelectedEvent(${eventsCount})"></i>
                             </div>
                           <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:20px">
-                            <div style="display: flex; flex-direction: row; ">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="eventName">Event Name : </label>
                                 <input type="text" name="eventName" required>
                             </div>
-                            <div style="display: flex; flex-direction: row; ">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="eventLocation">📍 Location : </label>
                                 <input id="eventLocationId-${eventsCount}" type="text" name="eventLocation" required>
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span> 
-                                <br><br>
                                 <label for="eventLocationTBD"> TBD
                                     <input id="eventLocationTBD-${eventsCount}" name="eventLocationTBD" type="checkbox"  onclick="toggleInput(this,${eventsCount})">
                                 </label>
                             </div>
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="eventDate">📆 Date : </label>
                                 <input id="eventDateId-${eventsCount}" type="date" name="eventDate" value="${firstEventDate}" required>
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span>
-                                <span>&nbsp;</span> 
-                                <br><br>
                                 <label for="eventDateTBD"> TBD
                                     <input id="eventDateTBD-${eventsCount}" name="eventDateTBD" type="checkbox"  onclick="toggleInput(this,${eventsCount})">
                                 </label>
                             </div>
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="eventDetails">Details : </label>
                                 <textarea id="eventDetails-${eventsCount}" rows="3" cols="30" name="eventDetails"></textarea>
                             </div>
                         </div>
                           <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px;  gap:20px">
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="cinematographers">🎥 Cinematographers : </label>
                                 <input type="number" name="cinematographers" min="0" value="1" required>
                             </div>
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="candidPhotographers">📷 Candid Photographers : </label>
                                 <input type="number" name="candidPhotographers" min="0" value="1" required>
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; gap:20px">
-                             <div style="display: flex; flex-direction: row;">
+                             <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="traditionalVideographers">📹 Traditional Videographers : </label>
                                 <input type="number" name="traditionalVideographers" min="0" value="1" required>
                             </div>
-                            <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <label for="traditionalPhotographers">📸 Traditional Photographers : </label>
                                 <input type="number" name="traditionalPhotographers" min="0" value="1" required>
                             </div>
-                        </div>
-                        <!-- <div style="display: flex; flex-direction: row; flex-wrap: wrap;margin: 20px; ">
-                            <div style="display: flex; flex-direction: row; width:50%">
-                                <label for="videographers">🎥 Videographers : </label>
-                                <input type="number" name="videographers" min="0" value="1" required>
-                            </div>
-                            <div style="display: flex; flex-direction: row; width:50%">
-                                <label for="photographers">📷 Photographers : </label>
-                                <input type="number" name="photographers" min="0" value="1" required>
-                            </div>
-                        </div>-->`;
+                        </div>`;
 
   eventSection.appendChild(newEvent);
 
@@ -689,7 +751,7 @@ function clearDataForNewProposal() {
   const crewFields = ["candidPhotographers-1", "cinematographers-1", "traditionalPhotographers-1", "traditionalVideographers-1"]; // List of IDs
   crewFields.forEach(id => document.getElementById(id).value = "1");
 
-  const hiddenFields = ["changeDeliverables"]
+  const hiddenFields = ["changeDeliverables", "changePWPSSectionDiv"]
   hiddenFields.forEach(id => document.getElementById(id).classList.add("hidden"));
 
   const disableFields = ["deliverables-photos-Id", "deliverables-albums-Id", "deliverables-film-Id", "deliverables-longVideos-Id",
@@ -704,8 +766,11 @@ function openNewProposalForm() {
   editInProgress = false;
   createInProgress = true;
   document.getElementById("formTitle").textContent = "New Proposal";
+  document.getElementById("submitBtn").textContent = "Create";
   clearDataForNewProposal();
   document.getElementById("quotationTable").classList.add("hidden");
+  document.getElementById("quotationTable").classList.remove("active-table");
+  document.getElementById("paginationContainer").classList.add("hidden");
   document.getElementById("formContainer").classList.remove("hidden");
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
@@ -740,28 +805,6 @@ document.getElementById("fetchQuotations").addEventListener("click", () => {
 });
 
 document.getElementById("addEvent").addEventListener("click", addEvent);
-
-document.getElementById('quotationTable').addEventListener('click', (event) => {
-  // Check if the clicked element is a button with an ID starting with 'expireQuotation'
-  if (event.target && event.target.id.startsWith('expireQuotation')) {
-    updateQuotationStatus(event.target.value, "Expired");
-  }
-  else if (event.target && event.target.id.startsWith('activateQuotation')) {
-    updateQuotationStatus(event.target.value, "Draft");
-  }
-  else if (event.target && event.target.id.startsWith('rejectQuotation')) {
-    updateQuotationStatus(event.target.value, "Rejected");
-  }
-  else if (event.target && event.target.id.startsWith('acceptQuotation')) {
-    updateQuotationStatus(event.target.value, "Accepted");
-  }
-  else if (event.target && event.target.id.startsWith('deleteQuotation')) {
-    deleteQuotation(event.target.value);
-  }
-  else if (event.target && event.target.id.startsWith('editProposal')) {
-    editProposal(event.target.value);
-  }
-});
 
 document.getElementById("quotationForm").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -811,8 +854,6 @@ document.getElementById("quotationForm").addEventListener("submit", async (event
       candidPhotographers: event.querySelector('input[name="candidPhotographers"]').value,
       traditionalPhotographers: event.querySelector('input[name="traditionalPhotographers"]').value,
       traditionalVideographers: event.querySelector('input[name="traditionalVideographers"]').value,
-      // videographers: event.querySelector('input[name="videographers"]').value,
-      // photographers: event.querySelector('input[name="photographers"]').value
     }));
 
     const quotation =
@@ -856,7 +897,7 @@ async function getDocumentData(collection_name, document_id) {
       return docSnap.data();
     }
   } catch (error) {
-    alert("Error fetching document:", error);
+    showToast("Error fetching document: "+ error, "error");
   }
 }
 
@@ -876,7 +917,9 @@ document.getElementById('editTermsAndConditions').addEventListener('click', (eve
 async function displayTermsAndConditions() {
   document.getElementById("formContainer").classList.add("hidden");
   document.getElementById("quotationTable").classList.add("hidden");
-  document.getElementById("termsAndConditionsSection").classList.toggle("hidden");
+  document.getElementById("quotationTable").classList.remove("active-table");
+  document.getElementById("paginationContainer").classList.add("hidden");
+  document.getElementById("termsAndConditionsSection").classList.remove("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
   document.getElementById("greetingsSection").classList.add("hidden");
   document.getElementById('editTermsAndConditionsSection').innerHTML = "";
@@ -899,7 +942,7 @@ function addNewTerms(item) {
   newTerms.innerHTML +=
     `<div style="display: flex; flex-direction: row; ">
     <label style="width:1%;">${termsAndConditionsCount}.</label> 
-    <textarea name="termsAndCondition" style="margin:20px;" type="text" rows="3">${item}</textarea>
+    <textarea name="termsAndCondition" style="margin:20px;" type="text" rows="6">${item}</textarea>
     </div>`
   editTermsAndConditionsSection.appendChild(newTerms);
 }
@@ -925,7 +968,7 @@ async function saveTermsAndConditions() {
     console.log("Terms and Conditions updated successfully!");
     fetchQuotations();
   } catch (error) {
-    alert("Error in Terms and Conditions updating:", error);
+    showToast("Error in Terms and Conditions updating: "+ error, "error");
   }
 }
 
@@ -945,8 +988,10 @@ document.getElementById('editDeliverables').addEventListener('click', (event) =>
 async function displayDeliverables() {
   document.getElementById("formContainer").classList.add("hidden");
   document.getElementById("quotationTable").classList.add("hidden");
+  document.getElementById("quotationTable").classList.remove("active-table");
+  document.getElementById("paginationContainer").classList.add("hidden");
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
-  document.getElementById("deliverablesSection").classList.toggle("hidden");
+  document.getElementById("deliverablesSection").classList.remove("hidden");
   document.getElementById("greetingsSection").classList.add("hidden");
   document.getElementById('editDeliverablesSection').innerHTML = "";
   deliverablesCount = 0;
@@ -968,7 +1013,7 @@ function addNewDeliverables(item) {
   newDeliverables.innerHTML +=
     `<div style="display: flex; flex-direction: row; ">
   <label style="width:1%;">${deliverablesCount}.</label> 
-  <textarea name="deliverable" style="margin:20px;" type="text" rows="3" columns="150">${item}</textarea>
+  <textarea name="deliverable" style="margin:20px;" type="text" rows="6" columns="150">${item}</textarea>
   </div>`
   editDeliverablesSection.appendChild(newDeliverables);
 }
@@ -994,7 +1039,7 @@ async function saveDeliverables() {
     console.log("Deliverables updated successfully!");
     fetchQuotations();
   } catch (error) {
-    alert("Error in Deliverables updating:", error);
+    showToast("Error in Deliverables updating: "+ error, "error");
   }
 }
 
@@ -1018,9 +1063,11 @@ document.getElementById('editGreetings').addEventListener('click', (event) => {
 async function displayGreetings() {
   document.getElementById("formContainer").classList.add("hidden");
   document.getElementById("quotationTable").classList.add("hidden");
+  document.getElementById("quotationTable").classList.remove("active-table");
+  document.getElementById("paginationContainer").classList.add("hidden");
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
-  document.getElementById("greetingsSection").classList.toggle("hidden");
+  document.getElementById("greetingsSection").classList.remove("hidden");
   document.getElementById('editGreetingsSection').innerHTML = "";
   greetingsCount = 0;
   const data = await getDocumentData(SEEDED_DATA_COLL, GREETINGS_DOC_ID)
@@ -1041,7 +1088,7 @@ function addNewGreetings(item) {
   newGreetings.innerHTML +=
     `<div style="display: flex; flex-direction: row; ">
     <label style="width:1%;">${greetingsCount}.</label> 
-    <textarea name="greeting" style="margin:20px;" type="text" rows="3">${item}</textarea>
+    <textarea name="greeting" style="margin:20px;" type="text" rows="6">${item}</textarea>
     </div>`
   editGreetingsSection.appendChild(newGreetings);
 }
@@ -1066,7 +1113,7 @@ async function saveGreetings() {
     await updateDoc(docRef, updatedData);
     fetchQuotations();
   } catch (error) {
-    alert("Error in Greetings updating:", error);
+    showToast("Error in Greetings updating: "+ error, "error");
   }
 }
 
@@ -1099,16 +1146,30 @@ async function validateTitle(customerName) {
   return false;
 }
 
-// Disable right-click context menu
-document.addEventListener("contextmenu", (e) => e.preventDefault());
+function showToast(message, type = "success") {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.className = `show ${type}`;
 
-// Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-document.addEventListener("keydown", (e) => {
-  if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'U')) {
-    e.preventDefault();
-  }
-});
-
+  setTimeout(() => {
+    toast.className = toast.className.replace("show", "");
+  }, 6000);
+}
 
 // Initialize the database
 initDB();
+
+// ===== Dark Mode =====
+const darkToggle = document.getElementById("darkModeToggle");
+
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark");
+}
+
+darkToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem(
+    "theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
+});
