@@ -216,7 +216,7 @@
                             <input type="text" title="Charges" id="albumsAddOnCostId" name="albumsAddOnCost"
                                 value="20,000" disabled required />
                             <label>per Album </label>
-                            <input type="number" title="Web Live Time" id="albumsAddOnPhotosId" name="albumsAddOnPhotos"
+                            <input class="compact-number-input" type="number" title="Web Live Time" id="albumsAddOnPhotosId" name="albumsAddOnPhotos"
                                 value="150" disabled required />
                             <label> Images </label>
                         </div>
@@ -228,10 +228,10 @@
                                 onclick="disableEnableElement(['hardDrivesCountId','hardDrivesSizeId'])" />
                             <span class="slider round"></span>
                         </label>
-                        <input style="width:30px" type="number" title="HD Count" id="hardDrivesCountId"
+                        <input class="compact-number-input" type="number" title="HD Count" id="hardDrivesCountId"
                             name="hardDrivesCount" value="2" disabled required />
                         <label for="hardDrivesCount">units of</label>
-                        <input style="width:30px" type="number" title="HD Size" id="hardDrivesSizeId"
+                        <input class="compact-number-input" type="number" title="HD Size" id="hardDrivesSizeId"
                             name="hardDrivesSize" value="6" disabled required />
                         <label for="hardDrivesSize">TB external hard drives.</label>
                     </div>
@@ -258,9 +258,17 @@
                         <input type="text" title="Charges" id="webLiveId" name="webLiveCharges" value="20,000" disabled
                             required />
                         <label>per session </label>
-                        <input type="number" title="Web Live Time" id="webLiveTimeId" name="webLiveTime" value="5"
+                        <input class="compact-number-input" type="number" title="Web Live Time" id="webLiveTimeId" name="webLiveTime" value="5"
                             disabled required />
                         <label> hours </label>
+                    </div>
+                    <div class="dynamic-editor-section">
+                        <div class="section-subheader">
+                            <h3>Custom Add-on Services</h3>
+                            <button id="addCustomAddOnBtn" type="button">+ Add Add-on Service</button>
+                        </div>
+                        <p class="helper-text">These services will appear in the quotation under Additional Services.</p>
+                        <div id="customAddOnServicesList" class="dynamic-stack"></div>
                     </div>
                 </section>
 
@@ -394,6 +402,14 @@
                                 <span class="slider round"></span>
                             </label>
                         </div>
+                    </div>
+                    <div class="dynamic-editor-section">
+                        <div class="section-subheader">
+                            <h3>Additional Deliverables</h3>
+                            <button id="addCustomDeliverableBtn" type="button">+ Add Deliverable</button>
+                        </div>
+                        <p class="helper-text">These will be appended after the standard deliverables in the quotation.</p>
+                        <div id="customDeliverablesList" class="dynamic-stack"></div>
                     </div>
                 </section>
 

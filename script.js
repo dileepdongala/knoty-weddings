@@ -14,6 +14,8 @@ let eventsCount = 1;
 let termsAndConditionsCount = 0;
 let deliverablesCount = 0;
 let greetingsCount = 0;
+let customAddOnCount = 0;
+let customDeliverablesCount = 0;
 let documentUrl;
 let hostUrl;
 let createInProgress = false;
@@ -87,6 +89,8 @@ async function addQuotation(quotation, deliverablesObj) {
     WebLive_Changed: quotation.WebLive_Changed,
     pwpsRequired: quotation.pwpsRequired,
     droneRequired: quotation.droneRequired,
+    custom_add_on_services: quotation.customAddOnServices,
+    custom_deliverables: quotation.customDeliverables,
   };
   if (quotation.Albums_Addon) {
     quotationData.Albums_Addon_Changed = quotation.Albums_Addon_Changed;
@@ -465,6 +469,7 @@ async function editProposal(docId) {
       document.getElementById("quotationTable").classList.add("hidden");
       document.getElementById("quotationTable").classList.remove("active-table");
       document.getElementById("formContainer").classList.remove("hidden");
+      clearDataForNewProposal();
       const quotation = docSnap.data();
       oldTitleInEdit = quotation.title;
       document.getElementById("editDocumentId").value = docId;
@@ -491,6 +496,7 @@ async function editProposal(docId) {
         eCnt = eCnt + 1;
       });
       document.getElementById("albumsAddOnCheckBoxId").checked = quotation.Albums_Addon;
+      document.getElementById("changeAlbumAddOnSec").classList.toggle("hidden", !quotation.Albums_Addon);
       if (quotation.Albums_Addon) {
         document.getElementById("albumsAddOnChangeCheckBoxId").checked = quotation.Albums_Addon_Changed;
         document.getElementById("changeAlbumAddOnSec").classList.remove("hidden");
@@ -525,8 +531,15 @@ async function editProposal(docId) {
       }
 
       document.getElementById("dronesCheckBoxId").checked = quotation.droneRequired;
+      (quotation.custom_add_on_services || []).forEach(service => {
+        addCustomAddOnService(service);
+      });
+      (quotation.custom_deliverables || []).forEach(item => {
+        addCustomDeliverable(item);
+      });
 
       document.getElementById("change-deliverables-CheckBoxId").checked = quotation.delChange;
+      document.getElementById("changeDeliverables").classList.add("hidden");
       if (quotation.delChange) {
         document.getElementById("changeDeliverables").classList.remove("hidden");
         document.getElementById("display-photos-CheckBoxId").checked = quotation.display_del_photos;
@@ -547,6 +560,13 @@ async function editProposal(docId) {
           document.getElementById("deliverables-rawData-Id").value = quotation.del_raw_data;
         if (quotation.del_reels)
           document.getElementById("deliverables-reels-Id").value = quotation.del_reels;
+
+        syncDeliverableElement("display-photos-CheckBoxId", "change-photos-CheckBoxId", "deliverables-photos-Id", Boolean(quotation.del_photos));
+        syncDeliverableElement("display-albums-CheckBoxId", "change-albums-CheckBoxId", "deliverables-albums-Id", Boolean(quotation.del_albums));
+        syncDeliverableElement("display-film-CheckBoxId", "change-film-CheckBoxId", "deliverables-film-Id", Boolean(quotation.del_films));
+        syncDeliverableElement("display-longVideos-CheckBoxId", "change-longVideos-CheckBoxId", "deliverables-longVideos-Id", Boolean(quotation.del_long_videos));
+        syncDeliverableElement("display-rawData-CheckBoxId", "change-rawData-CheckBoxId", "deliverables-rawData-Id", Boolean(quotation.del_raw_data));
+        syncDeliverableElement("display-reels-CheckBoxId", "change-reels-CheckBoxId", "deliverables-reels-Id", Boolean(quotation.del_reels));
       }
 
       // splitTeam = quotation.splitTeam;
@@ -739,6 +759,7 @@ function clearDataForNewProposal() {
   while (eventsCount > 1)
     removeEvent();
   document.getElementById("quotationForm").reset();
+  resetCustomCollections();
   const fields = ["eventDateId-1", "eventNameId-1", "eventLocationId-1"]; // List of IDs
   fields.forEach(id => {
     document.getElementById(id).value = "";
@@ -751,14 +772,23 @@ function clearDataForNewProposal() {
   const crewFields = ["candidPhotographers-1", "cinematographers-1", "traditionalPhotographers-1", "traditionalVideographers-1"]; // List of IDs
   crewFields.forEach(id => document.getElementById(id).value = "1");
 
-  const hiddenFields = ["changeDeliverables", "changePWPSSectionDiv"]
+  const hiddenFields = ["changeDeliverables"]
   hiddenFields.forEach(id => document.getElementById(id).classList.add("hidden"));
+  document.getElementById("changePWPSSectionDiv").classList.toggle("hidden", !document.getElementById("preWeddingPSReqCheckBoxId").checked);
+  document.getElementById("changeAlbumAddOnSec").classList.toggle("hidden", !document.getElementById("albumsAddOnCheckBoxId").checked);
 
   const disableFields = ["deliverables-photos-Id", "deliverables-albums-Id", "deliverables-film-Id", "deliverables-longVideos-Id",
     "deliverables-rawData-Id", "deliverables-reels-Id", "change-reels-CheckBoxId", "albumsAddOnCostId", "editValidUpToId",
     "albumsAddOnPhotosId", "hardDrivesCountId", "hardDrivesSizeId", "ledScreensId", "webLiveId", "webLiveTimeId", "preWeddingShootId"
   ]
   disableFields.forEach(id => document.getElementById(id).disabled = true);
+
+  syncDeliverableElement("display-photos-CheckBoxId", "change-photos-CheckBoxId", "deliverables-photos-Id");
+  syncDeliverableElement("display-albums-CheckBoxId", "change-albums-CheckBoxId", "deliverables-albums-Id");
+  syncDeliverableElement("display-film-CheckBoxId", "change-film-CheckBoxId", "deliverables-film-Id");
+  syncDeliverableElement("display-longVideos-CheckBoxId", "change-longVideos-CheckBoxId", "deliverables-longVideos-Id");
+  syncDeliverableElement("display-rawData-CheckBoxId", "change-rawData-CheckBoxId", "deliverables-rawData-Id");
+  syncDeliverableElement("display-reels-CheckBoxId", "change-reels-CheckBoxId", "deliverables-reels-Id");
 
 }
 
@@ -776,6 +806,110 @@ function openNewProposalForm() {
   document.getElementById("deliverablesSection").classList.add("hidden");
   document.getElementById("greetingsSection").classList.add("hidden");
   document.getElementById("editValidUpToIdDiv").classList.add("hidden");
+}
+
+function resetCustomCollections() {
+  document.getElementById("customAddOnServicesList").innerHTML = "";
+  document.getElementById("customDeliverablesList").innerHTML = "";
+  customAddOnCount = 0;
+  customDeliverablesCount = 0;
+}
+
+function refreshCustomCollectionLabels() {
+  document.querySelectorAll("#customAddOnServicesList .custom-add-on-service .editor-index").forEach((label, index) => {
+    label.textContent = `Add-on Service ${index + 1}`;
+  });
+  document.querySelectorAll("#customDeliverablesList .custom-deliverable .editor-index").forEach((label, index) => {
+    label.textContent = `Deliverable ${index + 1}`;
+  });
+  customAddOnCount = document.querySelectorAll("#customAddOnServicesList .custom-add-on-service").length;
+  customDeliverablesCount = document.querySelectorAll("#customDeliverablesList .custom-deliverable").length;
+}
+
+function addCustomAddOnService(service = {}) {
+  const list = document.getElementById("customAddOnServicesList");
+  const row = document.createElement("div");
+  row.classList.add("dynamic-card", "custom-add-on-service");
+  row.innerHTML = `
+    <div class="dynamic-card-header">
+      <span class="editor-index"></span>
+      <button type="button" class="dynamic-remove-btn">Remove</button>
+    </div>
+    <div class="dynamic-grid">
+      <div class="dynamic-field">
+        <label>Service Title</label>
+        <input type="text" name="customAddOnTitle" placeholder="Live Streaming Booth" />
+      </div>
+      <div class="dynamic-field">
+        <label>Price</label>
+        <input type="text" name="customAddOnPrice" placeholder="25,000" />
+      </div>
+      <div class="dynamic-field full-width">
+        <label>Details</label>
+        <textarea rows="2" name="customAddOnDetails" placeholder="per setup / per event / includes operator"></textarea>
+      </div>
+    </div>
+  `;
+
+  row.querySelector('input[name="customAddOnTitle"]').value = service.title || "";
+  row.querySelector('input[name="customAddOnPrice"]').value = service.price || "";
+  row.querySelector('textarea[name="customAddOnDetails"]').value = service.details || "";
+  row.querySelector(".dynamic-remove-btn").addEventListener("click", () => {
+    row.remove();
+    refreshCustomCollectionLabels();
+  });
+
+  list.appendChild(row);
+  refreshCustomCollectionLabels();
+}
+
+function addCustomDeliverable(item = "") {
+  const list = document.getElementById("customDeliverablesList");
+  const row = document.createElement("div");
+  row.classList.add("dynamic-card", "custom-deliverable");
+  row.innerHTML = `
+    <div class="dynamic-card-header">
+      <span class="editor-index"></span>
+      <button type="button" class="dynamic-remove-btn">Remove</button>
+    </div>
+    <div class="dynamic-field full-width">
+      <label>Deliverable</label>
+      <textarea rows="3" name="customDeliverableText" placeholder="Wedding teaser film (delivered in 45 days)"></textarea>
+    </div>
+  `;
+
+  row.querySelector('textarea[name="customDeliverableText"]').value = item || "";
+  row.querySelector(".dynamic-remove-btn").addEventListener("click", () => {
+    row.remove();
+    refreshCustomCollectionLabels();
+  });
+
+  list.appendChild(row);
+  refreshCustomCollectionLabels();
+}
+
+function getCustomAddOnServices() {
+  return Array.from(document.querySelectorAll("#customAddOnServicesList .custom-add-on-service")).map((row, index) => {
+    const title = row.querySelector('input[name="customAddOnTitle"]').value.trim();
+    const price = row.querySelector('input[name="customAddOnPrice"]').value.trim();
+    const details = row.querySelector('textarea[name="customAddOnDetails"]').value.trim();
+
+    if (!title && !price && !details) {
+      return null;
+    }
+
+    return {
+      title: title || `Add-on Service ${index + 1}`,
+      price,
+      details,
+    };
+  }).filter(Boolean);
+}
+
+function getCustomDeliverables() {
+  return Array.from(document.querySelectorAll("#customDeliverablesList .custom-deliverable"))
+    .map(row => row.querySelector('textarea[name="customDeliverableText"]').value.trim())
+    .filter(Boolean);
 }
 
 // Event listeners
@@ -805,6 +939,8 @@ document.getElementById("fetchQuotations").addEventListener("click", () => {
 });
 
 document.getElementById("addEvent").addEventListener("click", addEvent);
+document.getElementById("addCustomAddOnBtn").addEventListener("click", () => addCustomAddOnService());
+document.getElementById("addCustomDeliverableBtn").addEventListener("click", () => addCustomDeliverable());
 
 document.getElementById("quotationForm").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -841,6 +977,8 @@ document.getElementById("quotationForm").addEventListener("submit", async (event
     const pwpsChange = document.getElementById("preWeddingShootCheckBoxId").checked;
     const preWeddingPhotoShoot = document.getElementById("preWeddingShootId").value;
     const droneRequired = document.getElementById("dronesCheckBoxId").checked;
+    const customAddOnServices = getCustomAddOnServices();
+    const customDeliverables = getCustomDeliverables();
     const delChange = document.getElementById("change-deliverables-CheckBoxId").checked;
     const splitTeam = true;
     const events = Array.from(document.querySelectorAll('.event')).map(event => ({
@@ -857,7 +995,7 @@ document.getElementById("quotationForm").addEventListener("submit", async (event
     }));
 
     const quotation =
-      { title, events, price, addGst, mobile, splitTeam, Albums_Addon, Albums_Addon_Changed, Albums_Addon_Price, Albums_Addon_Photos, HD_Changed, HD_Count, HD_Size, LED_Changed, LED_Price, WebLive_Changed, WebLive_Price, WebLive_Time, pwpsRequired, pwpsChange, preWeddingPhotoShoot, droneRequired };
+      { title, events, price, addGst, mobile, splitTeam, Albums_Addon, Albums_Addon_Changed, Albums_Addon_Price, Albums_Addon_Photos, HD_Changed, HD_Count, HD_Size, LED_Changed, LED_Price, WebLive_Changed, WebLive_Price, WebLive_Time, pwpsRequired, pwpsChange, preWeddingPhotoShoot, droneRequired, customAddOnServices, customDeliverables };
     let deliverablesObj = { delChange };
 
     if (delChange) {
@@ -1128,12 +1266,25 @@ function disableEnableElement(idArr) {
 window.changeDeliverablesElement = changeDeliverablesElement;
 
 function changeDeliverablesElement(checkbox, textbox) {
-  disableEnableElement([checkbox]);
-  let checkoxVal = document.getElementById(checkbox).disabled;
-  if(checkoxVal){
-    document.getElementById(textbox).disabled = checkoxVal;
-    document.getElementById(checkbox).checked = !checkoxVal;
+  const displayCheckboxId = checkbox.replace("change-", "display-");
+  syncDeliverableElement(displayCheckboxId, checkbox, textbox);
+}
+
+function syncDeliverableElement(displayCheckboxId, changeCheckboxId, textboxId, forceChangeChecked) {
+  const displayCheckbox = document.getElementById(displayCheckboxId);
+  const changeCheckbox = document.getElementById(changeCheckboxId);
+  const textbox = document.getElementById(textboxId);
+
+  const isDisplayed = displayCheckbox.checked;
+  changeCheckbox.disabled = !isDisplayed;
+
+  if (!isDisplayed) {
+    changeCheckbox.checked = false;
+  } else if (typeof forceChangeChecked === "boolean") {
+    changeCheckbox.checked = forceChangeChecked;
   }
+
+  textbox.disabled = !(isDisplayed && changeCheckbox.checked);
 }
 
 async function validateTitle(customerName) {
