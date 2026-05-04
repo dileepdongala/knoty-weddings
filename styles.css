@@ -253,7 +253,7 @@ h3 {
 }
 
 /* ===== Inputs ===== */
-input, textarea {
+input, textarea, select {
   background: var(--card-alt);
   border: 1.5px solid var(--border);
   border-radius: 10px;
@@ -269,7 +269,7 @@ input::placeholder, textarea::placeholder {
   color: var(--muted);
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--primary);
   background: var(--card);
@@ -315,6 +315,43 @@ textarea {
   margin: 0 0 16px;
   color: var(--text-secondary);
   font-size: 13px;
+}
+
+.table-filters {
+  display: flex;
+  align-items: end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+  flex: 1;
+}
+
+.filter-field label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-secondary);
+}
+
+.filter-summary {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .dynamic-stack {
@@ -483,6 +520,13 @@ label {
 #quotationTable td {
   font-size: 13px;
   color: var(--text);
+}
+
+#quotationTable .empty-state td {
+  text-align: center;
+  padding: 28px 16px;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
 #quotationTable a {
@@ -849,6 +893,21 @@ label {
     padding: 12px;
   }
 
+  .table-filters {
+    padding: 14px;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .filter-field {
+    min-width: 100%;
+  }
+
+  .filter-summary {
+    margin-left: 0;
+    width: 100%;
+  }
+
   .pagination-btn {
     flex: 1;
     min-width: 100px;
@@ -885,12 +944,16 @@ label {
 
   /* Inputs */
   input,
-  textarea {
+  textarea,
+  select {
     font-size: 14px;
     padding: 10px 12px;
     width: 100%;
     min-width: auto;
     border-radius: 8px;
+  }
+
+  textarea {
     min-height: 100px;
   }
 
@@ -1001,6 +1064,20 @@ label {
   }
 
   #quotationTable td:first-child::before {
+    content: none;
+  }
+
+  #quotationTable .empty-state td,
+  #quotationTable .empty-state td:first-child {
+    display: block;
+    padding: 0;
+    margin: 0;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  #quotationTable .empty-state td::before {
     content: none;
   }
 

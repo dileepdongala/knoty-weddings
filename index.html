@@ -29,9 +29,27 @@
             <button id="darkModeToggle">🌙 Dark Mode</button>
             <button id="createQuotation">New Proposal</button>
             <button id="fetchQuotations">Proposals</button>
-            <button id="editDeliverables" hidden>✓ Deliverables</button>
+            <button id="editDeliverables">✨ Proposal Defaults</button>
             <button id="editTermsAndConditions">📑 Terms And Conditions</button>
             <button id="editGreetings">🤝 Greetings</button>
+        </div>
+        <div id="tableFilters" class="table-filters">
+            <div class="filter-field">
+                <label for="titleSearch">Search Title</label>
+                <input type="text" id="titleSearch" placeholder="Search proposals by title">
+            </div>
+            <div class="filter-field">
+                <label for="statusFilter">Filter Status</label>
+                <select id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="Draft">Draft</option>
+                    <option value="Sent">Sent</option>
+                    <option value="Accepted">Accepted</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Expired">Expired</option>
+                </select>
+            </div>
+            <div id="filterResultCount" class="filter-summary">0 proposals</div>
         </div>
         <table id="quotationTable">
             <thead>
@@ -173,7 +191,7 @@
                             <input type="checkbox" id="dronesCheckBoxId" name="dronesCheckBox" checked />
                             <span class="slider round"></span>
                         </label>
-                        <label>*Drone is complimentary for wedding*</label>
+                        <label id="droneComplimentaryHint">*Drone is complimentary for wedding*</label>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
                         <label> Include Pre-Wedding Photo shoot as Complimentary? </label>
@@ -197,7 +215,7 @@
                         </div>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label> Include Albums as Add-on service ? </label>
+                        <label> Include <span id="albumsAddOnServiceNameLabel">Albums</span> as Add-on service ? </label>
                         <label class="switch">
                             <input type="checkbox" id="albumsAddOnCheckBoxId" name="albumsAddOnCheckBox" checked
                                 onclick="hideElement('albumsAddOnCheckBoxId','changeAlbumAddOnSec')" />
@@ -206,7 +224,7 @@
                     </div>
                     <div id="changeAlbumAddOnSec">
                         <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                            <label> Do you want to change Albums Section in Add-on Services ? </label>
+                            <label> Do you want to change <span id="albumsAddOnSectionLabel">Albums</span> Section in Add-on Services ? </label>
                             <label class="switch">
                                 <input type="checkbox" id="albumsAddOnChangeCheckBoxId" name="albumsAddOnChangeCheckBox"
                                     onclick="disableEnableElement(['albumsAddOnCostId','albumsAddOnPhotosId'])" />
@@ -215,10 +233,10 @@
                             <label for="webLiveCharges">💲 Charges : ₹ </label>
                             <input type="text" title="Charges" id="albumsAddOnCostId" name="albumsAddOnCost"
                                 value="20,000" disabled required />
-                            <label>per Album </label>
+                            <label id="albumsAddOnUnitLabel">per album</label>
                             <input class="compact-number-input" type="number" title="Web Live Time" id="albumsAddOnPhotosId" name="albumsAddOnPhotos"
                                 value="150" disabled required />
-                            <label> Images </label>
+                            <label id="albumsAddOnCountUnitLabel">images</label>
                         </div>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
@@ -236,7 +254,7 @@
                         <label for="hardDrivesSize">TB external hard drives.</label>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label> Do you want to change LED screens section ? </label>
+                        <label> Do you want to change <span id="ledSectionTitleLabel">LED Screens</span> section ? </label>
                         <label class="switch">
                             <input type="checkbox" id="ledScreensCheckBoxId" name="ledScreensCheckBox"
                                 onclick="disableEnableElement(['ledScreensId'])" />
@@ -245,10 +263,10 @@
                         <label for="ledScreensCharges">💲 Charges : ₹ </label>
                         <input type="text" title="Charges" id="ledScreensId" name="ledScreensCharges" value="20,000"
                             disabled required />
-                        <label>per LED Screen</label>
+                        <label id="ledSectionDetailsLabel">per LED screen</label>
                     </div>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
-                        <label> Do you want to change Web Live Section ? </label>
+                        <label> Do you want to change <span id="webLiveSectionTitleLabel">Web Live</span> Section ? </label>
                         <label class="switch">
                             <input type="checkbox" id="webLiveCheckBoxId" name="webLiveCheckBox"
                                 onclick="disableEnableElement(['webLiveId','webLiveTimeId'])" />
@@ -257,10 +275,10 @@
                         <label for="webLiveCharges">💲 Charges : ₹ </label>
                         <input type="text" title="Charges" id="webLiveId" name="webLiveCharges" value="20,000" disabled
                             required />
-                        <label>per session </label>
+                        <label id="webLiveSectionDetailsLabel">per session</label>
                         <input class="compact-number-input" type="number" title="Web Live Time" id="webLiveTimeId" name="webLiveTime" value="5"
                             disabled required />
-                        <label> hours </label>
+                        <label id="webLiveSectionTimeUnitLabel">hours</label>
                     </div>
                     <div class="dynamic-editor-section">
                         <div class="section-subheader">
@@ -276,13 +294,14 @@
                     <h2>Deliverables</h2>
                     <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin: 20px; gap:10px">
                         <div style="display: flex; flex-direction: column; flex-wrap: wrap; margin: 20px; gap:10px">
-                            <label>1. 1000 Handpicked & Edited images in Cloud (delivered in 20 days )</label>
-                            <label>2. Two premium Designer Albums 150-200 images in each album (40 sheets per album) </label>
-                            <label>3. A cinematic Film of 3-5 mins with best footages from all the events in cloud
+                            <label id="defaultDeliverableSummaryPhotos">1. 1000 Handpicked & Edited images in Cloud (delivered in 20 days )</label>
+                            <label id="defaultDeliverableSummaryAlbums">2. Two premium Designer Albums 150-200 images in each album (40 sheets per album) </label>
+                            <label id="defaultDeliverableSummaryFilm">3. A cinematic Film of 3-5 mins with best footages from all the events in cloud
                                 (delivered in 60 days ) </label>
-                            <label>4. Full Length Documented long videos for all the events in hard drives (delivered in
+                            <label id="defaultDeliverableSummaryLongVideos">4. Full Length Documented long videos for all the events in hard drives (delivered in
                                 60 days ) </label>
-                            <label>5. All Raw data, Edited photos & videos in Hard drives </label>
+                            <label id="defaultDeliverableSummaryReels">5. Reels from 2 different events, duration of each reel is 30 sec to 1 min - delivered in 60 days.</label>
+                            <label id="defaultDeliverableSummaryRawData">6. All Raw data, Edited photos & videos in Hard drives </label>
                             <h2>Change Default Deliverables ?</h2>
                             <label class="switch">
                                 <input title="Change Default Deliverables ?" type="checkbox"
@@ -299,7 +318,7 @@
                                     onclick="changeDeliverablesElement('change-photos-CheckBoxId', 'deliverables-photos-Id')" />
                                 <span class="slider round"></span>
                             </label>
-                            <label> Photos </label>
+                            <label id="deliverablesPhotosLabel">Photos</label>
                             <textarea rows="2" cols="50" title="Photos" id="deliverables-photos-Id" disabled
                                 required>1000 Handpicked & Edited images in Cloud (delivered in 20 days ) </textarea>
                             <label> Change Photos ? </label>
@@ -317,7 +336,7 @@
                                     onclick="changeDeliverablesElement('change-film-CheckBoxId', 'deliverables-film-Id')" />
                                 <span class="slider round"></span>
                             </label>
-                            <label> Film </label>
+                            <label id="deliverablesFilmLabel">Film</label>
                             <textarea rows="2" cols="50" title="film" id="deliverables-film-Id" disabled
                                 required>A cinematic Film of 3-5 mins with best footages from all the events in cloud (delivered in 60 days )  </textarea>
                             <label> Change Film ? </label>
@@ -335,7 +354,7 @@
                                     onclick="changeDeliverablesElement('change-longVideos-CheckBoxId', 'deliverables-longVideos-Id')" />
                                 <span class="slider round"></span>
                             </label>
-                            <label> Long Videos </label>
+                            <label id="deliverablesLongVideosLabel">Long Videos</label>
                             <textarea rows="2" cols="50" title="Long Videos" id="deliverables-longVideos-Id" disabled
                                 required>Full Length Documented long videos for all the events in hard drives (delivered in 60 days )  </textarea>
                             <label> Change Long Videos ? </label>
@@ -353,7 +372,7 @@
                                     onclick="changeDeliverablesElement('change-rawData-CheckBoxId', 'deliverables-rawData-Id')" />
                                 <span class="slider round"></span>
                             </label>
-                            <label> Raw Data </label>
+                            <label id="deliverablesRawDataLabel">Raw Data</label>
                             <textarea rows="2" cols="50" title="Raw Data" id="deliverables-rawData-Id" disabled
                                 required>All Raw data, Edited photos & videos in Hard drives </textarea>
                             <label> Change Raw Data ? </label>
@@ -372,7 +391,7 @@
                                         onclick="changeDeliverablesElement('change-albums-CheckBoxId', 'deliverables-albums-Id')" />
                                     <span class="slider round"></span>
                                 </label>
-                                <label> Albums </label>
+                                <label id="deliverablesAlbumsLabel">Albums</label>
                                 <textarea rows="2" cols="50" title="albums" id="deliverables-albums-Id" disabled
                                     required>Two premium Designer Albums 150-200 images in each album (40 sheets per album)  </textarea>
                                 <label> Change Albums ? </label>
@@ -391,7 +410,7 @@
                                     onclick="changeDeliverablesElement('change-reels-CheckBoxId', 'deliverables-reels-Id')" />
                                 <span class="slider round"></span>
                             </label>
-                            <label> Reels </label>
+                            <label id="deliverablesReelsLabel">Reels</label>
                             <textarea rows="2" cols="50" title="Reels" id="deliverables-reels-Id" disabled
                                 required>Reels from 2  different events , duration of each reel is 30 sec to 1 min - delivered in 60 days. </textarea>
                             <label> Change Reels ? </label>
@@ -429,12 +448,139 @@
         </div>
         <div id="deliverablesSection" class="hidden">
             <form id="deliverablesForm">
-                <h2 style="margin:20px;">Deliverables</h2>
-                <div id="editDeliverablesSection" style="padding: 0 20px;">
+                <h2 style="margin:20px;">Proposal Defaults</h2>
+                <div class="dynamic-editor-section">
+                    <div class="section-subheader">
+                        <h3>Complimentary</h3>
+                        <button id="addNewComplimentaryBtn" type="button">+ Add Complimentary Item</button>
+                    </div>
+                    <p class="helper-text">Add a title and an optional description for each complimentary item. The quotation will format them automatically.</p>
+                    <div id="editComplimentarySection" class="dynamic-stack"></div>
                 </div>
-                <label style="width: 100%; color:red; font-weight: bolder; padding: 0 20px; margin: 20px 0;">Note : Add both Heading and detail in same field. Separate Heading (first) and detail (second) with ::: </label>
+
+                <div class="dynamic-editor-section">
+                    <div class="section-subheader">
+                        <h3>Additional Services</h3>
+                    </div>
+                    <p class="helper-text">These are the default services shown in the quotation when no proposal-specific override is set.</p>
+                    <div class="dynamic-field full-width">
+                        <label for="defaultAddOnIntro">Intro Text</label>
+                        <textarea id="defaultAddOnIntro" rows="3" placeholder="Add-on services provided by our partner vendors..."></textarea>
+                    </div>
+                    <div class="dynamic-grid" style="margin-top: 16px;">
+                        <div class="dynamic-card">
+                            <div class="dynamic-card-header">
+                                <span class="editor-index">Fixed Service 1</span>
+                            </div>
+                            <div class="dynamic-grid">
+                                <div class="dynamic-field">
+                                    <label for="defaultLedTitle">Service Title</label>
+                                    <input type="text" id="defaultLedTitle" placeholder="LED Screens" />
+                                </div>
+                                <div class="dynamic-field">
+                                    <label for="defaultLedPrice">Price</label>
+                                    <input type="text" id="defaultLedPrice" placeholder="20,000" />
+                                </div>
+                                <div class="dynamic-field full-width">
+                                    <label for="defaultLedDetails">Details</label>
+                                    <input type="text" id="defaultLedDetails" placeholder="per LED screen" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dynamic-card">
+                            <div class="dynamic-card-header">
+                                <span class="editor-index">Fixed Service 2</span>
+                            </div>
+                            <div class="dynamic-grid">
+                                <div class="dynamic-field">
+                                    <label for="defaultWebLiveTitle">Service Title</label>
+                                    <input type="text" id="defaultWebLiveTitle" placeholder="Web Live" />
+                                </div>
+                                <div class="dynamic-field">
+                                    <label for="defaultWebLivePrice">Price</label>
+                                    <input type="text" id="defaultWebLivePrice" placeholder="20,000" />
+                                </div>
+                                <div class="dynamic-field">
+                                    <label for="defaultWebLiveTime">Duration (hours)</label>
+                                    <input type="number" id="defaultWebLiveTime" min="1" placeholder="5" />
+                                </div>
+                                <div class="dynamic-field full-width">
+                                    <label for="defaultWebLiveDetails">Details</label>
+                                    <input type="text" id="defaultWebLiveDetails" placeholder="per session" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dynamic-card">
+                            <div class="dynamic-card-header">
+                                <span class="editor-index">Fixed Service 3</span>
+                            </div>
+                            <div class="dynamic-grid">
+                                <div class="dynamic-field">
+                                    <label for="defaultAlbumsTitle">Service Title</label>
+                                    <input type="text" id="defaultAlbumsTitle" placeholder="Albums" />
+                                </div>
+                                <div class="dynamic-field">
+                                    <label for="defaultAlbumsPrice">Price</label>
+                                    <input type="text" id="defaultAlbumsPrice" placeholder="20,000" />
+                                </div>
+                                <div class="dynamic-field">
+                                    <label for="defaultAlbumsPhotos">Images Count</label>
+                                    <input type="number" id="defaultAlbumsPhotos" min="1" placeholder="150" />
+                                </div>
+                                <div class="dynamic-field full-width">
+                                    <label for="defaultAlbumsDetails">Details</label>
+                                    <input type="text" id="defaultAlbumsDetails" placeholder="per album" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-subheader" style="margin-top: 20px;">
+                        <h3>Additional Default Add-on Services</h3>
+                        <button id="addDefaultAdditionalServiceBtn" type="button">+ Add Default Add-on Service</button>
+                    </div>
+                    <div id="defaultAdditionalServicesList" class="dynamic-stack"></div>
+                </div>
+
+                <div class="dynamic-editor-section">
+                    <div class="section-subheader">
+                        <h3>Deliverables</h3>
+                    </div>
+                    <p class="helper-text">Core deliverables map directly to the proposal editor and quotation renderer.</p>
+                    <div class="dynamic-grid">
+                        <div class="dynamic-field full-width">
+                            <label for="defaultDeliverablesPhotos">Photos</label>
+                            <textarea id="defaultDeliverablesPhotos" rows="3"></textarea>
+                        </div>
+                        <div class="dynamic-field full-width">
+                            <label for="defaultDeliverablesAlbums">Albums</label>
+                            <textarea id="defaultDeliverablesAlbums" rows="3"></textarea>
+                        </div>
+                        <div class="dynamic-field full-width">
+                            <label for="defaultDeliverablesFilm">Film</label>
+                            <textarea id="defaultDeliverablesFilm" rows="3"></textarea>
+                        </div>
+                        <div class="dynamic-field full-width">
+                            <label for="defaultDeliverablesLongVideos">Long Videos</label>
+                            <textarea id="defaultDeliverablesLongVideos" rows="3"></textarea>
+                        </div>
+                        <div class="dynamic-field full-width">
+                            <label for="defaultDeliverablesReels">Reels</label>
+                            <textarea id="defaultDeliverablesReels" rows="3"></textarea>
+                        </div>
+                        <div class="dynamic-field full-width">
+                            <label for="defaultDeliverablesRawData">Raw Data</label>
+                            <textarea id="defaultDeliverablesRawData" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <p class="helper-text" style="margin-top: 20px;">Add extra deliverables with a title and optional detail. No special separator is needed.</p>
+                    <div class="section-subheader" style="margin-top: 20px;">
+                        <h3>Additional Default Deliverables</h3>
+                        <button id="addNewDeliverablesBtn" type="button">+ Add Default Deliverable</button>
+                    </div>
+                    <div id="editDeliverablesSection" class="dynamic-stack"></div>
+                </div>
+
                 <div style="display: flex; flex-direction: row; gap: 12px; margin: 20px; flex-wrap: wrap;">
-                    <button id="addNewDeliverablesBtn" type="button">+ Add New Deliverables</button>
                     <button type="submit">Save changes</button>
                 </div>
             </form>

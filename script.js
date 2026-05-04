@@ -1,10 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, addDoc, updateDoc, getDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, addDoc, updateDoc, getDoc, deleteDoc, query, where, setDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
 const QUOTATION_COLL = "Quotations";
 const SEEDED_DATA_COLL = "Seeded_Data";
 const GREETINGS_DOC_ID = "Greetings_Doc";
+const COMPLIMENTARY_DOC_ID = "Complimentary_Doc";
 const DELIVERABLES_DOC_ID = "Deliverables";
+const ADDITIONAL_SERVICES_DOC_ID = "Additional_Services_Doc";
 const TERMS_AND_CONDITIONS_DOC_ID = "Terms_And_Conditions_Doc";
 const WHATSAPP_MESSAGE_ID = "Whatsapp_message";
 const QUOTATION_HOST = "Quotation_Host";
@@ -13,19 +15,335 @@ let documentId;
 let eventsCount = 1;
 let termsAndConditionsCount = 0;
 let deliverablesCount = 0;
+let complimentaryCount = 0;
+let defaultAdditionalServiceCount = 0;
 let greetingsCount = 0;
 let customAddOnCount = 0;
 let customDeliverablesCount = 0;
 let documentUrl;
 let hostUrl;
+let proposalDefaultsLoadPromise;
+let proposalDefaults = {
+  complimentary: [],
+  deliverables: {},
+  additionalServices: {}
+};
 let createInProgress = false;
 let editInProgress = false;
 let oldTitleInEdit;
 
 // Pagination variables
 let allQuotations = [];
+let filteredQuotations = [];
 let currentPage = 1;
 const itemsPerPage = 15;
+
+function toggleTableFiltersVisibility(shouldShow) {
+  document.getElementById("tableFilters").classList.toggle("hidden", !shouldShow);
+}
+
+function updateFilterSummary() {
+  const resultCount = filteredQuotations.length;
+  const totalCount = allQuotations.length;
+  const label = totalCount === 1 ? "proposal" : "proposals";
+  document.getElementById("filterResultCount").textContent = `Showing ${resultCount} of ${totalCount} ${label}`;
+}
+
+function applyQuotationFilters(resetPage = false) {
+  const titleSearchValue = document.getElementById("titleSearch").value.trim().toLowerCase();
+  const selectedStatus = document.getElementById("statusFilter").value;
+
+  filteredQuotations = allQuotations.filter((quotation) => {
+    const matchesTitle = !titleSearchValue || (quotation.title || "").toLowerCase().includes(titleSearchValue);
+    const matchesStatus = !selectedStatus || quotation.status === selectedStatus;
+    return matchesTitle && matchesStatus;
+  });
+
+  if (resetPage) {
+    currentPage = 1;
+  } else {
+    const totalPages = Math.max(1, Math.ceil(filteredQuotations.length / itemsPerPage));
+    currentPage = Math.min(currentPage, totalPages);
+  }
+
+  updateFilterSummary();
+  renderPage();
+}
+
+function createDefaultDeliverablesState() {
+  return {
+    photos: "1000 Handpicked & Edited images in Cloud (delivered in 20 days )",
+    albums: "Two premium Designer Albums 150-200 images in each album (40 sheets per album)",
+    film: "A cinematic Film of 3-5 mins with best footages from all the events in cloud (delivered in 60 days )",
+    long_video: "Full Length Documented long videos for all the events in hard drives (delivered in 60 days )",
+    reels: "Reels from 2 different events , duration of each reel is 30 sec to 1 min - delivered in 60 days.",
+    raw_data: "All Raw data, Edited photos & videos in Hard drives",
+    additional_deliverables: []
+  };
+}
+
+function createDefaultAdditionalServicesState() {
+  return {
+    intro: "Add-on services provided by our partner vendors that can greatly enhance your event experience.",
+    led: {
+      title: "LED Screens",
+      price: "20,000",
+      details: "per LED screen"
+    },
+    web_live: {
+      title: "Web Live",
+      price: "20,000",
+      time: 5,
+      details: "per session"
+    },
+    albums: {
+      title: "Albums",
+      price: "20,000",
+      photos: 150,
+      details: "per album"
+    },
+    additional_services: []
+  };
+}
+
+function normalizeTextValue(value) {
+  return `${value || ""}`.trim();
+}
+
+function normalizeList(list) {
+  return Array.isArray(list) ? list.filter(item => item && `${item}`.trim()) : [];
+}
+
+function parseStructuredEntry(entry, fallbackTitle = "") {
+  if (!entry) {
+    return { title: fallbackTitle, details: "" };
+  }
+
+  if (typeof entry === "object") {
+    const title = normalizeTextValue(entry.title || entry.main || fallbackTitle);
+    const details = normalizeTextValue(entry.details || entry.meta);
+    return { title, details };
+  }
+
+  const text = normalizeTextValue(entry);
+  if (!text) {
+    return { title: fallbackTitle, details: "" };
+  }
+
+  if (text.includes(":::")) {
+    const [title, ...rest] = text.split(":::");
+    return {
+      title: normalizeTextValue(title) || fallbackTitle,
+      details: normalizeTextValue(rest.join(":::"))
+    };
+  }
+
+  const bracketMatch = text.match(/^(.*?)(?:\(([^)]+)\))$/);
+  if (bracketMatch) {
+    return {
+      title: normalizeTextValue(bracketMatch[1]) || fallbackTitle,
+      details: normalizeTextValue(bracketMatch[2])
+    };
+  }
+
+  return { title: text || fallbackTitle, details: "" };
+}
+
+function serializeStructuredEntry(entry) {
+  const title = normalizeTextValue(entry?.title || entry?.main);
+  const details = normalizeTextValue(entry?.details || entry?.meta);
+  if (!title) return "";
+  return details ? `${title}:::${details}` : title;
+}
+
+function formatDeliverablePreview(entry) {
+  const title = normalizeTextValue(entry?.title);
+  const details = normalizeTextValue(entry?.details);
+  if (!title) return "";
+  return details ? `${title} (${details})` : title;
+}
+
+function normalizeDeliverablesDoc(data = {}) {
+  const defaults = createDefaultDeliverablesState();
+  const legacyList = normalizeList(data.Deliverables);
+  const usesLegacyReelsSlot = legacyList.length >= 6;
+
+  return {
+    photos: data.photos || legacyList[0] || defaults.photos,
+    albums: data.albums || legacyList[1] || defaults.albums,
+    film: data.film || legacyList[2] || defaults.film,
+    long_video: data.long_video || legacyList[3] || defaults.long_video,
+    reels: data.reels || (usesLegacyReelsSlot ? legacyList[4] : "") || defaults.reels,
+    raw_data: data.raw_data || (usesLegacyReelsSlot ? legacyList[5] : legacyList[4]) || defaults.raw_data,
+    additional_deliverables: normalizeList(
+      data.additional_deliverables || (usesLegacyReelsSlot ? legacyList.slice(6) : legacyList.slice(5))
+    ).map(item => parseStructuredEntry(item))
+  };
+}
+
+function normalizeComplimentaryDoc(data = {}) {
+  const complimentary = normalizeList(data.items || data.complimentary).map(item => parseStructuredEntry(item));
+  if (complimentary.length) {
+    return complimentary;
+  }
+
+  return [
+    {
+      title: "Drone",
+      details: "Drone coverage is complimentary for the wedding event."
+    },
+    {
+      title: "Pre-Wedding Photoshoot",
+      details: "You will receive a collection of 50 beautifully edited & retouched images in cloud gallery"
+    }
+  ];
+}
+
+function normalizeAdditionalServiceItem(service = {}) {
+  return {
+    title: (service.title || "").trim(),
+    price: (service.price || "").trim(),
+    details: (service.details || "").trim()
+  };
+}
+
+function normalizeAdditionalServicesDoc(data = {}) {
+  const defaults = createDefaultAdditionalServicesState();
+  return {
+    intro: (data.intro || defaults.intro).trim(),
+    led: {
+      title: (data.led?.title || defaults.led.title).trim(),
+      price: (data.led?.price || defaults.led.price).trim(),
+      details: (data.led?.details || defaults.led.details).trim()
+    },
+    web_live: {
+      title: (data.web_live?.title || defaults.web_live.title).trim(),
+      price: (data.web_live?.price || defaults.web_live.price).trim(),
+      time: Number(data.web_live?.time || defaults.web_live.time) || defaults.web_live.time,
+      details: (data.web_live?.details || defaults.web_live.details).trim()
+    },
+    albums: {
+      title: (data.albums?.title || defaults.albums.title).trim(),
+      price: (data.albums?.price || defaults.albums.price).trim(),
+      photos: Number(data.albums?.photos || defaults.albums.photos) || defaults.albums.photos,
+      details: (data.albums?.details || defaults.albums.details).trim()
+    },
+    additional_services: Array.isArray(data.additional_services)
+      ? data.additional_services
+        .map(normalizeAdditionalServiceItem)
+        .filter(service => service.title || service.price || service.details)
+      : []
+  };
+}
+
+function getPreWeddingComplimentaryText(complimentaryList = []) {
+  const match = complimentaryList.find(item => normalizeTextValue(item.title).toLowerCase().includes("pre-wedding"));
+  if (!match) {
+    return "You will receive a collection of 50 beautifully edited & retouched images in cloud gallery";
+  }
+
+  return normalizeTextValue(match.details) || "You will receive a collection of 50 beautifully edited & retouched images in cloud gallery";
+}
+
+function getDroneComplimentaryText(complimentaryList = []) {
+  const match = complimentaryList.find(item => normalizeTextValue(item.title).toLowerCase().includes("drone"));
+  if (!match) {
+    return "Drone coverage is complimentary for the wedding event.";
+  }
+
+  return normalizeTextValue(match.details) || "Drone coverage is complimentary for the wedding event.";
+}
+
+function createQuotationSlug(title = "") {
+  return normalizeTextValue(title)
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function isLocalPreviewContext() {
+  return window.location.protocol === "file:"
+    || window.location.hostname === "localhost"
+    || window.location.hostname === "127.0.0.1";
+}
+
+function getLocalQuotationPreviewUrl(title) {
+  const previewUrl = new URL("./quotation.html", window.location.href);
+  previewUrl.searchParams.set("title", title);
+  return previewUrl.toString();
+}
+
+function getQuotationOpenUrl(quotation) {
+  if (isLocalPreviewContext()) {
+    return getLocalQuotationPreviewUrl(quotation.title);
+  }
+
+  return `${hostUrl}${quotation.url || `/${quotation.slug || createQuotationSlug(quotation.title)}`}`;
+}
+
+function applyProposalFormDefaults() {
+  const deliverables = proposalDefaults.deliverables;
+  const services = proposalDefaults.additionalServices;
+
+  document.getElementById("preWeddingShootId").value = getPreWeddingComplimentaryText(proposalDefaults.complimentary);
+  document.getElementById("droneComplimentaryHint").textContent = `*${getDroneComplimentaryText(proposalDefaults.complimentary)}*`;
+
+  document.getElementById("albumsAddOnCostId").value = services.albums.price;
+  document.getElementById("albumsAddOnPhotosId").value = services.albums.photos;
+  document.getElementById("ledScreensId").value = services.led.price;
+  document.getElementById("webLiveId").value = services.web_live.price;
+  document.getElementById("webLiveTimeId").value = services.web_live.time;
+
+  document.getElementById("albumsAddOnServiceNameLabel").textContent = services.albums.title;
+  document.getElementById("albumsAddOnSectionLabel").textContent = services.albums.title;
+  document.getElementById("albumsAddOnUnitLabel").textContent = services.albums.details;
+  document.getElementById("albumsAddOnCountUnitLabel").textContent = "images";
+  document.getElementById("ledSectionTitleLabel").textContent = services.led.title;
+  document.getElementById("ledSectionDetailsLabel").textContent = services.led.details;
+  document.getElementById("webLiveSectionTitleLabel").textContent = services.web_live.title;
+  document.getElementById("webLiveSectionDetailsLabel").textContent = services.web_live.details;
+  document.getElementById("webLiveSectionTimeUnitLabel").textContent = "hours";
+
+  document.getElementById("defaultDeliverableSummaryPhotos").textContent = `1. ${deliverables.photos}`;
+  document.getElementById("defaultDeliverableSummaryAlbums").textContent = `2. ${deliverables.albums}`;
+  document.getElementById("defaultDeliverableSummaryFilm").textContent = `3. ${deliverables.film}`;
+  document.getElementById("defaultDeliverableSummaryLongVideos").textContent = `4. ${deliverables.long_video}`;
+  document.getElementById("defaultDeliverableSummaryReels").textContent = `5. ${deliverables.reels}`;
+  document.getElementById("defaultDeliverableSummaryRawData").textContent = `6. ${deliverables.raw_data}`;
+
+  document.getElementById("deliverables-photos-Id").value = deliverables.photos;
+  document.getElementById("deliverables-albums-Id").value = deliverables.albums;
+  document.getElementById("deliverables-film-Id").value = deliverables.film;
+  document.getElementById("deliverables-longVideos-Id").value = deliverables.long_video;
+  document.getElementById("deliverables-reels-Id").value = deliverables.reels;
+  document.getElementById("deliverables-rawData-Id").value = deliverables.raw_data;
+}
+
+async function loadProposalDefaults(forceReload = false) {
+  if (proposalDefaultsLoadPromise && !forceReload) {
+    return proposalDefaultsLoadPromise;
+  }
+
+  proposalDefaultsLoadPromise = (async () => {
+    const [complimentaryDoc, deliverablesDoc, additionalServicesDoc] = await Promise.all([
+      getDocumentData(SEEDED_DATA_COLL, COMPLIMENTARY_DOC_ID),
+      getDocumentData(SEEDED_DATA_COLL, DELIVERABLES_DOC_ID),
+      getDocumentData(SEEDED_DATA_COLL, ADDITIONAL_SERVICES_DOC_ID)
+    ]);
+
+    proposalDefaults = {
+      complimentary: normalizeComplimentaryDoc(complimentaryDoc || {}),
+      deliverables: normalizeDeliverablesDoc(deliverablesDoc || {}),
+      additionalServices: normalizeAdditionalServicesDoc(additionalServicesDoc || {})
+    };
+
+    applyProposalFormDefaults();
+    return proposalDefaults;
+  })();
+
+  return proposalDefaultsLoadPromise;
+}
 
 // Initialize fireBase
 function initDB() {
@@ -43,6 +361,7 @@ function initDB() {
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   getQuotationHost();
+  loadProposalDefaults();
   fetchQuotations();
 }
 
@@ -75,6 +394,7 @@ async function addQuotation(quotation, deliverablesObj) {
 
   const quotationData = {
     title: quotation.title,
+    slug: createQuotationSlug(quotation.title),
     price: quotation.price,
     created_date: formattedDateTime,
     events: quotation.events,
@@ -116,15 +436,28 @@ async function addQuotation(quotation, deliverablesObj) {
       quotationData.preWeddingPhotoShoot = quotation.preWeddingPhotoShoot;
     }
   }
-  if (deliverablesObj.delChange) {
+  if (typeof deliverablesObj.delChange === "boolean") {
     quotationData.delChange = deliverablesObj.delChange;
+  }
+  if (typeof deliverablesObj.disPlayDelRawData === "boolean") {
     quotationData.display_del_raw_data = deliverablesObj.disPlayDelRawData;
+  }
+  if (typeof deliverablesObj.disPlayDelLongVideos === "boolean") {
     quotationData.display_del_long_videos = deliverablesObj.disPlayDelLongVideos;
+  }
+  if (typeof deliverablesObj.disPlayDelPhotos === "boolean") {
     quotationData.display_del_photos = deliverablesObj.disPlayDelPhotos;
+  }
+  if (typeof deliverablesObj.disPlayDelAlbums === "boolean") {
     quotationData.display_del_albums = deliverablesObj.disPlayDelAlbums;
+  }
+  if (typeof deliverablesObj.disPlayDelFilms === "boolean") {
     quotationData.display_del_films = deliverablesObj.disPlayDelFilms;
+  }
+  if (typeof deliverablesObj.disPlayDelReels === "boolean") {
     quotationData.display_del_reels = deliverablesObj.disPlayDelReels;
-
+  }
+  if (deliverablesObj.delChange) {
     if (deliverablesObj.disPlayDelRawData && deliverablesObj.changeDelRawData) {
       quotationData.del_raw_data = deliverablesObj.updatedDelRawData;
     }
@@ -155,18 +488,17 @@ async function addQuotation(quotation, deliverablesObj) {
       const docRef = await addDoc(quotationCollectionRef, quotationData);
       documentId = docRef.id;
     }
-    let urlTitle = quotation.title.replace(" & ", "-");
-    //documentUrl = `quotation.html?id=${urlTitle}:::${documentId}`;
-    documentUrl = `/${urlTitle}`;
+    documentUrl = `/${quotationData.slug}`;
 
     // Open the quotation in a new tab
-    window.open(hostUrl + documentUrl, "_blank");
+    window.open(getQuotationOpenUrl({ ...quotationData, url: documentUrl }), "_blank");
   } catch (error) {
     showToast("Error adding document: "+ error, "error");
   }
   const docRef = doc(db, QUOTATION_COLL, documentId);
 
   const updatedData = {
+    ['slug']: quotationData.slug,
     ['url']: documentUrl, // Dynamically set the field to update
   };
   await updateDoc(docRef, updatedData);
@@ -194,16 +526,32 @@ function sortTableByDate() {
 }
 
 function renderPage() {
+  const totalItems = filteredQuotations.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  currentPage = Math.min(currentPage, totalPages);
   const start = (currentPage - 1) * itemsPerPage;
   const end = start + itemsPerPage;
-  const pageData = allQuotations.slice(start, end);
+  const pageData = filteredQuotations.slice(start, end);
 
   const tableBody = document.querySelector("#quotationTable tbody");
   tableBody.innerHTML = "";
 
+  if (!pageData.length) {
+    tableBody.innerHTML = `
+      <tr class="empty-state">
+        <td colspan="9">No proposals match the current search or status filter.</td>
+      </tr>
+    `;
+    document.getElementById("pageInfo").textContent = totalItems === 0 ? "No matching proposals" : `Page ${currentPage} of ${totalPages}`;
+    document.getElementById("prevPage").disabled = true;
+    document.getElementById("nextPage").disabled = true;
+    document.getElementById("paginationContainer").classList.add("hidden");
+    return;
+  }
+
   pageData.forEach((quotation) => {
     const row = document.createElement("tr");
-    let completeUrl = hostUrl + `${quotation.url}`
+    let completeUrl = getQuotationOpenUrl(quotation);
     documentUrl = quotation.url;
     
     // Determine status icon and color
@@ -265,7 +613,6 @@ function renderPage() {
   });
 
   // Update pagination info
-  const totalPages = Math.ceil(allQuotations.length / itemsPerPage);
   document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages}`;
   document.getElementById("prevPage").disabled = currentPage === 1;
   document.getElementById("nextPage").disabled = currentPage === totalPages;
@@ -283,6 +630,7 @@ async function fetchQuotations() {
   document.getElementById("formContainer").classList.add("hidden");
   document.getElementById("quotationTable").classList.remove("hidden");
   document.getElementById("quotationTable").classList.add("active-table");
+  toggleTableFiltersVisibility(true);
   document.getElementById("paginationContainer").classList.remove("hidden");
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
@@ -295,8 +643,7 @@ async function fetchQuotations() {
       allQuotations.push({ id: doc.id, ...doc.data() });
     });
     sortTableByDate();
-    currentPage = 1;
-    renderPage();
+    applyQuotationFilters(true);
 
   } catch (error) {
     showToast("Error fetching Quotations: "+ error, "error");
@@ -312,11 +659,19 @@ document.getElementById("prevPage").addEventListener("click", () => {
 });
 
 document.getElementById("nextPage").addEventListener("click", () => {
-  const totalPages = Math.ceil(allQuotations.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredQuotations.length / itemsPerPage));
   if (currentPage < totalPages) {
     currentPage++;
     renderPage();
   }
+});
+
+document.getElementById("titleSearch").addEventListener("input", () => {
+  applyQuotationFilters(true);
+});
+
+document.getElementById("statusFilter").addEventListener("change", () => {
+  applyQuotationFilters(true);
 });
 
 // Toggle action menu visibility
@@ -461,6 +816,7 @@ async function editProposal(docId) {
   editInProgress = true;
   document.getElementById("formTitle").textContent = "Edit Proposal";
   document.getElementById("submitBtn").textContent = "Update";
+  await loadProposalDefaults();
   const quotationDocRef = doc(db, QUOTATION_COLL, docId); // Reference to the 'Quotations' collection and the specific document ID
   try {
     const docSnap = await getDoc(quotationDocRef); // Fetch the document snapshot
@@ -468,6 +824,7 @@ async function editProposal(docId) {
     if (docSnap.exists()) {
       document.getElementById("quotationTable").classList.add("hidden");
       document.getElementById("quotationTable").classList.remove("active-table");
+      toggleTableFiltersVisibility(false);
       document.getElementById("formContainer").classList.remove("hidden");
       clearDataForNewProposal();
       const quotation = docSnap.data();
@@ -538,16 +895,23 @@ async function editProposal(docId) {
         addCustomDeliverable(item);
       });
 
-      document.getElementById("change-deliverables-CheckBoxId").checked = quotation.delChange;
+      document.getElementById("change-deliverables-CheckBoxId").checked = Boolean(quotation.delChange);
       document.getElementById("changeDeliverables").classList.add("hidden");
+      if (typeof quotation.display_del_photos === "boolean")
+        document.getElementById("display-photos-CheckBoxId").checked = quotation.display_del_photos;
+      if (typeof quotation.display_del_albums === "boolean")
+        document.getElementById("display-albums-CheckBoxId").checked = quotation.display_del_albums;
+      if (typeof quotation.display_del_films === "boolean")
+        document.getElementById("display-film-CheckBoxId").checked = quotation.display_del_films;
+      if (typeof quotation.display_del_long_videos === "boolean")
+        document.getElementById("display-longVideos-CheckBoxId").checked = quotation.display_del_long_videos;
+      if (typeof quotation.display_del_raw_data === "boolean")
+        document.getElementById("display-rawData-CheckBoxId").checked = quotation.display_del_raw_data;
+      if (typeof quotation.display_del_reels === "boolean")
+        document.getElementById("display-reels-CheckBoxId").checked = quotation.display_del_reels;
+
       if (quotation.delChange) {
         document.getElementById("changeDeliverables").classList.remove("hidden");
-        document.getElementById("display-photos-CheckBoxId").checked = quotation.display_del_photos;
-        document.getElementById("display-albums-CheckBoxId").checked = quotation.display_del_albums;
-        document.getElementById("display-film-CheckBoxId").checked = quotation.display_del_films;
-        document.getElementById("display-longVideos-CheckBoxId").checked = quotation.display_del_long_videos;
-        document.getElementById("display-rawData-CheckBoxId").checked = quotation.display_del_raw_data;
-        document.getElementById("display-reels-CheckBoxId").checked = quotation.display_del_reels;
         if (quotation.del_albums)
           document.getElementById("deliverables-albums-Id").value = quotation.del_albums;
         if (quotation.del_photos)
@@ -760,6 +1124,7 @@ function clearDataForNewProposal() {
     removeEvent();
   document.getElementById("quotationForm").reset();
   resetCustomCollections();
+  applyProposalFormDefaults();
   const fields = ["eventDateId-1", "eventNameId-1", "eventLocationId-1"]; // List of IDs
   fields.forEach(id => {
     document.getElementById(id).value = "";
@@ -792,15 +1157,17 @@ function clearDataForNewProposal() {
 
 }
 
-function openNewProposalForm() {
+async function openNewProposalForm() {
   editInProgress = false;
   createInProgress = true;
   document.getElementById("formTitle").textContent = "New Proposal";
   document.getElementById("submitBtn").textContent = "Create";
+  await loadProposalDefaults();
   clearDataForNewProposal();
   document.getElementById("quotationTable").classList.add("hidden");
   document.getElementById("quotationTable").classList.remove("active-table");
   document.getElementById("paginationContainer").classList.add("hidden");
+  toggleTableFiltersVisibility(false);
   document.getElementById("formContainer").classList.remove("hidden");
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
@@ -996,29 +1363,45 @@ document.getElementById("quotationForm").addEventListener("submit", async (event
 
     const quotation =
       { title, events, price, addGst, mobile, splitTeam, Albums_Addon, Albums_Addon_Changed, Albums_Addon_Price, Albums_Addon_Photos, HD_Changed, HD_Count, HD_Size, LED_Changed, LED_Price, WebLive_Changed, WebLive_Price, WebLive_Time, pwpsRequired, pwpsChange, preWeddingPhotoShoot, droneRequired, customAddOnServices, customDeliverables };
-    let deliverablesObj = { delChange };
-
-    if (delChange) {
-      const disPlayDelPhotos = document.getElementById("display-photos-CheckBoxId").checked;
-      const changeDelPhotos = document.getElementById("change-photos-CheckBoxId").checked;
-      const updatedDelPhotos = document.getElementById("deliverables-photos-Id").value;
-      const disPlayDelAlbums = document.getElementById("display-albums-CheckBoxId").checked;
-      const changeDelAlbums = document.getElementById("change-albums-CheckBoxId").checked;
-      const updatedDelAlbums = document.getElementById("deliverables-albums-Id").value;
-      const disPlayDelFilms = document.getElementById("display-film-CheckBoxId").checked;
-      const changeDelFilms = document.getElementById("change-film-CheckBoxId").checked;
-      const updatedDelFilms = document.getElementById("deliverables-film-Id").value;
-      const disPlayDelReels = document.getElementById("display-reels-CheckBoxId").checked;
-      const changeDelReels = document.getElementById("change-reels-CheckBoxId").checked;
-      const updatedDelReels = document.getElementById("deliverables-reels-Id").value;
-      const disPlayDelLongVideos = document.getElementById("display-longVideos-CheckBoxId").checked;
-      const changeDelLongVideos = document.getElementById("change-longVideos-CheckBoxId").checked;
-      const updatedDelLongVideos = document.getElementById("deliverables-longVideos-Id").value;
-      const disPlayDelRawData = document.getElementById("display-rawData-CheckBoxId").checked;
-      const changeDelRawData = document.getElementById("change-rawData-CheckBoxId").checked;
-      const updatedDelRawData = document.getElementById("deliverables-rawData-Id").value;
-      deliverablesObj = { delChange, disPlayDelRawData, changeDelRawData, updatedDelRawData, disPlayDelLongVideos, changeDelLongVideos, updatedDelLongVideos, disPlayDelPhotos, changeDelPhotos, updatedDelPhotos, disPlayDelAlbums, changeDelAlbums, updatedDelAlbums, disPlayDelFilms, changeDelFilms, updatedDelFilms, disPlayDelReels, changeDelReels, updatedDelReels }
-    }
+    const disPlayDelPhotos = document.getElementById("display-photos-CheckBoxId").checked;
+    const changeDelPhotos = document.getElementById("change-photos-CheckBoxId").checked;
+    const updatedDelPhotos = document.getElementById("deliverables-photos-Id").value;
+    const disPlayDelAlbums = document.getElementById("display-albums-CheckBoxId").checked;
+    const changeDelAlbums = document.getElementById("change-albums-CheckBoxId").checked;
+    const updatedDelAlbums = document.getElementById("deliverables-albums-Id").value;
+    const disPlayDelFilms = document.getElementById("display-film-CheckBoxId").checked;
+    const changeDelFilms = document.getElementById("change-film-CheckBoxId").checked;
+    const updatedDelFilms = document.getElementById("deliverables-film-Id").value;
+    const disPlayDelReels = document.getElementById("display-reels-CheckBoxId").checked;
+    const changeDelReels = document.getElementById("change-reels-CheckBoxId").checked;
+    const updatedDelReels = document.getElementById("deliverables-reels-Id").value;
+    const disPlayDelLongVideos = document.getElementById("display-longVideos-CheckBoxId").checked;
+    const changeDelLongVideos = document.getElementById("change-longVideos-CheckBoxId").checked;
+    const updatedDelLongVideos = document.getElementById("deliverables-longVideos-Id").value;
+    const disPlayDelRawData = document.getElementById("display-rawData-CheckBoxId").checked;
+    const changeDelRawData = document.getElementById("change-rawData-CheckBoxId").checked;
+    const updatedDelRawData = document.getElementById("deliverables-rawData-Id").value;
+    const deliverablesObj = {
+      delChange,
+      disPlayDelRawData,
+      changeDelRawData,
+      updatedDelRawData,
+      disPlayDelLongVideos,
+      changeDelLongVideos,
+      updatedDelLongVideos,
+      disPlayDelPhotos,
+      changeDelPhotos,
+      updatedDelPhotos,
+      disPlayDelAlbums,
+      changeDelAlbums,
+      updatedDelAlbums,
+      disPlayDelFilms,
+      changeDelFilms,
+      updatedDelFilms,
+      disPlayDelReels,
+      changeDelReels,
+      updatedDelReels
+    };
 
     addQuotation(quotation, deliverablesObj);
 
@@ -1057,6 +1440,7 @@ async function displayTermsAndConditions() {
   document.getElementById("quotationTable").classList.add("hidden");
   document.getElementById("quotationTable").classList.remove("active-table");
   document.getElementById("paginationContainer").classList.add("hidden");
+  toggleTableFiltersVisibility(false);
   document.getElementById("termsAndConditionsSection").classList.remove("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
   document.getElementById("greetingsSection").classList.add("hidden");
@@ -1128,56 +1512,270 @@ async function displayDeliverables() {
   document.getElementById("quotationTable").classList.add("hidden");
   document.getElementById("quotationTable").classList.remove("active-table");
   document.getElementById("paginationContainer").classList.add("hidden");
+  toggleTableFiltersVisibility(false);
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
   document.getElementById("deliverablesSection").classList.remove("hidden");
   document.getElementById("greetingsSection").classList.add("hidden");
   document.getElementById('editDeliverablesSection').innerHTML = "";
+  document.getElementById('editComplimentarySection').innerHTML = "";
+  document.getElementById('defaultAdditionalServicesList').innerHTML = "";
   deliverablesCount = 0;
-  const data = await getDocumentData(SEEDED_DATA_COLL, DELIVERABLES_DOC_ID)
-  data.Deliverables.forEach(item => {
-    addNewDeliverables(item);
-  });
+  complimentaryCount = 0;
+  defaultAdditionalServiceCount = 0;
+
+  const defaults = await loadProposalDefaults(true);
+
+  document.getElementById("defaultAddOnIntro").value = defaults.additionalServices.intro;
+  document.getElementById("defaultLedTitle").value = defaults.additionalServices.led.title;
+  document.getElementById("defaultLedPrice").value = defaults.additionalServices.led.price;
+  document.getElementById("defaultLedDetails").value = defaults.additionalServices.led.details;
+  document.getElementById("defaultWebLiveTitle").value = defaults.additionalServices.web_live.title;
+  document.getElementById("defaultWebLivePrice").value = defaults.additionalServices.web_live.price;
+  document.getElementById("defaultWebLiveTime").value = defaults.additionalServices.web_live.time;
+  document.getElementById("defaultWebLiveDetails").value = defaults.additionalServices.web_live.details;
+  document.getElementById("defaultAlbumsTitle").value = defaults.additionalServices.albums.title;
+  document.getElementById("defaultAlbumsPrice").value = defaults.additionalServices.albums.price;
+  document.getElementById("defaultAlbumsPhotos").value = defaults.additionalServices.albums.photos;
+  document.getElementById("defaultAlbumsDetails").value = defaults.additionalServices.albums.details;
+
+  document.getElementById("defaultDeliverablesPhotos").value = defaults.deliverables.photos;
+  document.getElementById("defaultDeliverablesAlbums").value = defaults.deliverables.albums;
+  document.getElementById("defaultDeliverablesFilm").value = defaults.deliverables.film;
+  document.getElementById("defaultDeliverablesLongVideos").value = defaults.deliverables.long_video;
+  document.getElementById("defaultDeliverablesReels").value = defaults.deliverables.reels;
+  document.getElementById("defaultDeliverablesRawData").value = defaults.deliverables.raw_data;
+
+  defaults.complimentary.forEach(item => addNewComplimentary(item));
+  defaults.deliverables.additional_deliverables.forEach(item => addNewDeliverables(item));
+  defaults.additionalServices.additional_services.forEach(service => addDefaultAdditionalService(service));
 }
 
-document.getElementById("addNewDeliverablesBtn").addEventListener("click", (event) => {
+document.getElementById("addNewDeliverablesBtn").addEventListener("click", () => {
   addNewDeliverables('');
 });
 
-function addNewDeliverables(item) {
-  let editDeliverablesSection = document.getElementById('editDeliverablesSection');
-  let newDeliverables = document.createElement('div');
-  newDeliverables.classList.add('deliverables');
-  deliverablesCount += 1;
-  newDeliverables.innerHTML +=
-    `<div style="display: flex; flex-direction: row; ">
-  <label style="width:1%;">${deliverablesCount}.</label> 
-  <textarea name="deliverable" style="margin:20px;" type="text" rows="6" columns="150">${item}</textarea>
-  </div>`
-  editDeliverablesSection.appendChild(newDeliverables);
+document.getElementById("addNewComplimentaryBtn").addEventListener("click", () => {
+  addNewComplimentary('');
+});
+
+document.getElementById("addDefaultAdditionalServiceBtn").addEventListener("click", () => {
+  addDefaultAdditionalService({});
+});
+
+function refreshProposalDefaultsEditorLabels() {
+  document.querySelectorAll("#editDeliverablesSection .default-deliverable-item .editor-index").forEach((label, index) => {
+    label.textContent = `Default Deliverable ${index + 1}`;
+  });
+  document.querySelectorAll("#editComplimentarySection .complimentary-default-item .editor-index").forEach((label, index) => {
+    label.textContent = `Complimentary Item ${index + 1}`;
+  });
+  document.querySelectorAll("#defaultAdditionalServicesList .default-additional-service .editor-index").forEach((label, index) => {
+    label.textContent = `Add-on Service ${index + 1}`;
+  });
+  deliverablesCount = document.querySelectorAll("#editDeliverablesSection .default-deliverable-item").length;
+  complimentaryCount = document.querySelectorAll("#editComplimentarySection .complimentary-default-item").length;
+  defaultAdditionalServiceCount = document.querySelectorAll("#defaultAdditionalServicesList .default-additional-service").length;
 }
 
-document.getElementById("deliverablesForm").addEventListener("submit", (event) => {
+function addNewDeliverables(item) {
+  const entry = parseStructuredEntry(item);
+  const editDeliverablesSection = document.getElementById('editDeliverablesSection');
+  const newDeliverable = document.createElement('div');
+  newDeliverable.classList.add('dynamic-card', 'default-deliverable-item');
+  newDeliverable.innerHTML = `
+    <div class="dynamic-card-header">
+      <span class="editor-index"></span>
+      <button type="button" class="dynamic-remove-btn">Remove</button>
+    </div>
+    <div class="dynamic-grid">
+      <div class="dynamic-field">
+        <label>Title</label>
+        <input type="text" name="deliverableTitle" />
+      </div>
+      <div class="dynamic-field full-width">
+        <label>Detail</label>
+        <textarea name="deliverableDetails" rows="3"></textarea>
+      </div>
+    </div>
+  `;
+  newDeliverable.querySelector('input[name="deliverableTitle"]').value = entry.title || "";
+  newDeliverable.querySelector('textarea[name="deliverableDetails"]').value = entry.details || "";
+  newDeliverable.querySelector(".dynamic-remove-btn").addEventListener("click", () => {
+    newDeliverable.remove();
+    refreshProposalDefaultsEditorLabels();
+  });
+  editDeliverablesSection.appendChild(newDeliverable);
+  refreshProposalDefaultsEditorLabels();
+}
+
+function addNewComplimentary(item) {
+  const entry = parseStructuredEntry(item);
+  const complimentarySection = document.getElementById('editComplimentarySection');
+  const newComplimentary = document.createElement('div');
+  newComplimentary.classList.add('dynamic-card', 'complimentary-default-item');
+  newComplimentary.innerHTML = `
+    <div class="dynamic-card-header">
+      <span class="editor-index"></span>
+      <button type="button" class="dynamic-remove-btn">Remove</button>
+    </div>
+    <div class="dynamic-grid">
+      <div class="dynamic-field">
+        <label>Title</label>
+        <input type="text" name="complimentaryTitle" />
+      </div>
+      <div class="dynamic-field full-width">
+        <label>Description</label>
+        <textarea name="complimentaryDetails" rows="3"></textarea>
+      </div>
+    </div>
+  `;
+  newComplimentary.querySelector('input[name="complimentaryTitle"]').value = entry.title || "";
+  newComplimentary.querySelector('textarea[name="complimentaryDetails"]').value = entry.details || "";
+  newComplimentary.querySelector(".dynamic-remove-btn").addEventListener("click", () => {
+    newComplimentary.remove();
+    refreshProposalDefaultsEditorLabels();
+  });
+  complimentarySection.appendChild(newComplimentary);
+  refreshProposalDefaultsEditorLabels();
+}
+
+function addDefaultAdditionalService(service = {}) {
+  const list = document.getElementById("defaultAdditionalServicesList");
+  const row = document.createElement("div");
+  row.classList.add("dynamic-card", "default-additional-service");
+  row.innerHTML = `
+    <div class="dynamic-card-header">
+      <span class="editor-index"></span>
+      <button type="button" class="dynamic-remove-btn">Remove</button>
+    </div>
+    <div class="dynamic-grid">
+      <div class="dynamic-field">
+        <label>Service Title</label>
+        <input type="text" name="defaultServiceTitle" />
+      </div>
+      <div class="dynamic-field">
+        <label>Price</label>
+        <input type="text" name="defaultServicePrice" />
+      </div>
+      <div class="dynamic-field full-width">
+        <label>Details</label>
+        <textarea rows="2" name="defaultServiceDetails"></textarea>
+      </div>
+    </div>
+  `;
+  row.querySelector('input[name="defaultServiceTitle"]').value = service.title || "";
+  row.querySelector('input[name="defaultServicePrice"]').value = service.price || "";
+  row.querySelector('textarea[name="defaultServiceDetails"]').value = service.details || "";
+  row.querySelector(".dynamic-remove-btn").addEventListener("click", () => {
+    row.remove();
+    refreshProposalDefaultsEditorLabels();
+  });
+  list.appendChild(row);
+  refreshProposalDefaultsEditorLabels();
+}
+
+function getStructuredEditorValues(selector, titleSelector, detailsSelector) {
+  return Array.from(document.querySelectorAll(selector)).map(item => {
+    const title = normalizeTextValue(item.querySelector(titleSelector)?.value);
+    const details = normalizeTextValue(item.querySelector(detailsSelector)?.value);
+    if (!title && !details) {
+      return null;
+    }
+
+    return {
+      title: title || "Untitled",
+      details
+    };
+  }).filter(Boolean);
+}
+
+function getDefaultAdditionalServices() {
+  return Array.from(document.querySelectorAll("#defaultAdditionalServicesList .default-additional-service")).map((row) => {
+    const title = row.querySelector('input[name="defaultServiceTitle"]').value.trim();
+    const price = row.querySelector('input[name="defaultServicePrice"]').value.trim();
+    const details = row.querySelector('textarea[name="defaultServiceDetails"]').value.trim();
+
+    if (!title && !price && !details) {
+      return null;
+    }
+
+    return { title, price, details };
+  }).filter(Boolean);
+}
+
+document.getElementById("deliverablesForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  saveDeliverables()
+  await saveDeliverables();
 });
 
 async function saveDeliverables() {
-  const deliverables = Array.from(document.querySelectorAll('.deliverables')).map(term => {
-    let actualDeliverable = term.querySelector('textarea[name="deliverable"]').value
-    return actualDeliverable && actualDeliverable.trim() !== '' ? actualDeliverable : null;
-  }).filter(term => term !== null);
-  try {
-    const docRef = doc(db, SEEDED_DATA_COLL, DELIVERABLES_DOC_ID);
+  const deliverables = {
+    photos: document.getElementById("defaultDeliverablesPhotos").value.trim(),
+    albums: document.getElementById("defaultDeliverablesAlbums").value.trim(),
+    film: document.getElementById("defaultDeliverablesFilm").value.trim(),
+    long_video: document.getElementById("defaultDeliverablesLongVideos").value.trim(),
+    reels: document.getElementById("defaultDeliverablesReels").value.trim(),
+    raw_data: document.getElementById("defaultDeliverablesRawData").value.trim(),
+    additional_deliverables: getStructuredEditorValues(
+      "#editDeliverablesSection .default-deliverable-item",
+      'input[name="deliverableTitle"]',
+      'textarea[name="deliverableDetails"]'
+    )
+  };
+  const complimentary = getStructuredEditorValues(
+    "#editComplimentarySection .complimentary-default-item",
+    'input[name="complimentaryTitle"]',
+    'textarea[name="complimentaryDetails"]'
+  );
+  const additionalServices = {
+    intro: document.getElementById("defaultAddOnIntro").value.trim(),
+    led: {
+      title: document.getElementById("defaultLedTitle").value.trim(),
+      price: document.getElementById("defaultLedPrice").value.trim(),
+      details: document.getElementById("defaultLedDetails").value.trim()
+    },
+    web_live: {
+      title: document.getElementById("defaultWebLiveTitle").value.trim(),
+      price: document.getElementById("defaultWebLivePrice").value.trim(),
+      time: Number(document.getElementById("defaultWebLiveTime").value) || 5,
+      details: document.getElementById("defaultWebLiveDetails").value.trim()
+    },
+    albums: {
+      title: document.getElementById("defaultAlbumsTitle").value.trim(),
+      price: document.getElementById("defaultAlbumsPrice").value.trim(),
+      photos: Number(document.getElementById("defaultAlbumsPhotos").value) || 150,
+      details: document.getElementById("defaultAlbumsDetails").value.trim()
+    },
+    additional_services: getDefaultAdditionalServices()
+  };
 
-    const updatedData = {
-      ['Deliverables']: deliverables, // Dynamically set the field to update
-    };
-    //await deleteDoc(quotationCollectionRef); // Deletes the document
-    await updateDoc(docRef, updatedData);
-    console.log("Deliverables updated successfully!");
+  const deliverablesDoc = {
+    ...deliverables,
+    Deliverables: [
+      deliverables.photos,
+      deliverables.albums,
+      deliverables.film,
+      deliverables.long_video,
+      deliverables.reels,
+      deliverables.raw_data,
+      ...deliverables.additional_deliverables.map(formatDeliverablePreview)
+    ].filter(Boolean)
+  };
+
+  try {
+    await Promise.all([
+      setDoc(doc(db, SEEDED_DATA_COLL, DELIVERABLES_DOC_ID), deliverablesDoc, { merge: true }),
+      setDoc(doc(db, SEEDED_DATA_COLL, COMPLIMENTARY_DOC_ID), {
+        items: complimentary,
+        complimentary: complimentary.map(serializeStructuredEntry)
+      }, { merge: true }),
+      setDoc(doc(db, SEEDED_DATA_COLL, ADDITIONAL_SERVICES_DOC_ID), additionalServices, { merge: true })
+    ]);
+    await loadProposalDefaults(true);
+    showToast("Proposal defaults updated successfully!", "success");
     fetchQuotations();
   } catch (error) {
-    showToast("Error in Deliverables updating: "+ error, "error");
+    showToast("Error in proposal defaults updating: "+ error, "error");
   }
 }
 
@@ -1203,6 +1801,7 @@ async function displayGreetings() {
   document.getElementById("quotationTable").classList.add("hidden");
   document.getElementById("quotationTable").classList.remove("active-table");
   document.getElementById("paginationContainer").classList.add("hidden");
+  toggleTableFiltersVisibility(false);
   document.getElementById("termsAndConditionsSection").classList.add("hidden");
   document.getElementById("deliverablesSection").classList.add("hidden");
   document.getElementById("greetingsSection").classList.remove("hidden");
