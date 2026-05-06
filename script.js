@@ -282,6 +282,12 @@ function getQuotationOpenUrl(quotation) {
   return `${hostUrl}${quotation.url || `/${quotation.slug || createQuotationSlug(quotation.title)}`}`;
 }
 
+function getQuotationPdfUrl(quotation) {
+  const pdfUrl = new URL(getQuotationOpenUrl(quotation), window.location.href);
+  pdfUrl.searchParams.set("download", "pdf");
+  return pdfUrl.toString();
+}
+
 function applyProposalFormDefaults() {
   const deliverables = proposalDefaults.deliverables;
   const services = proposalDefaults.additionalServices;
@@ -552,6 +558,7 @@ function renderPage() {
   pageData.forEach((quotation) => {
     const row = document.createElement("tr");
     let completeUrl = getQuotationOpenUrl(quotation);
+    let pdfUrl = getQuotationPdfUrl(quotation);
     documentUrl = quotation.url;
     
     // Determine status icon and color
@@ -592,7 +599,12 @@ function renderPage() {
     let quoteHTML = `
         <td data-label="Title">${quotation.title}</td>
         <td data-label="Price">₹${quotation.price}/-</td>
-        <td data-label="Quotation"><a href="${completeUrl}" target="_blank">Open</a></td>
+        <td data-label="Quotation">
+          <div class="quotation-links">
+            <a href="${completeUrl}" target="_blank">Open</a>
+            <a class="pdf-download-link" href="${pdfUrl}" target="_blank" title="Download quotation as PDF">PDF</a>
+          </div>
+        </td>
         <td data-label="Mobile">+${quotation.mobile}</td>
         <td data-label="Share"><i onclick="sendWhatsAppMessage(${quotation.mobile},'${docId}')" class="fa fa-whatsapp" style="cursor: pointer;font-size:24px;"></i></td>
         <td data-label="Status"><span class="${statusClass}">${statusDisplay}</span></td>

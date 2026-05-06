@@ -542,6 +542,21 @@ label {
   transform: translateX(2px);
 }
 
+.quotation-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#quotationTable a.pdf-download-link {
+  color: var(--success);
+}
+
+#quotationTable a.pdf-download-link:hover {
+  color: #2e7d32;
+}
+
 /* ===== Action Menu ===== */
 .action-menu-container {
   position: relative;
